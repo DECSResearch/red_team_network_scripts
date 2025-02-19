@@ -4,6 +4,7 @@
 A Python-based ARP cache poisoning tool for demonstrating MITM (Man-in-the-Middle) attacks between two network devices.
 
 ### Current Implementation 
+- CLI configuration with argparse for targets/interface
 - Bidirectional ARP spoofing
 - Automatic ARP table restoration on exit (Ctrl+C)
 - Configurable target IP addresses
@@ -13,25 +14,20 @@ A Python-based ARP cache poisoning tool for demonstrating MITM (Man-in-the-Middl
 1. **Start monitoring** (new terminal):
 ```sudo tcpdump -i eth0 -nnv "host 192.168.1.16 and host 192.168.1.23"```
 2. **Enable IP forwarding)** (if not already set):
-```sudo sysctl -w net.ipv4.ip_forward=1```
+```sudo sysctl -w net.ipv4.ip_forward=1``` # Temporary enable
+For persistence: add 'net.ipv4.ip_forward=1' to /etc/sysctl.conf
 
-3. **Run the ARP spoofer**:
-```sudo python3 arp_spoof.py```
+4. **Run the ARP spoofer**:
+```sudo python3 arp_spoof.py 192.168.1.16 192.168.1.23 -i eth0```
 
 
-4. **Verify ARP table changes** on target devices:
-On nano1 (192.168.1.16):
+5. **Verify ARP table changes** on target devices:
+On target_1 (192.168.1.16):
 ```arp -n | grep 192.168.1.23```
 
-On agx1 (192.168.1.23):
+On target_2 (192.168.1.23):
 ```arp -n | grep 192.168.1.16```
 
-
-### Configuration
-Edit these variables in the script:
-iface = "eth0" # Network interface
-nano1_ip = "192.168.1.16" # First target IP
-agx1_ip = "192.168.1.23" # Second target I
 
 ### Key Commands
 | Command | Purpose |
@@ -49,8 +45,11 @@ agx1_ip = "192.168.1.23" # Second target I
 - Ensure targets are on same VLAN
 - Check physical connectivity
 
-3. **[No traffic visible?](pplx://action/followup)**
+3. **No traffic visible?**
 - Confirm IP forwarding is enabled:
      ```sudo sysctl -w net.ipv4.ip_forward=1```
 - Check correct network interface
 - Verify target IPs are active (`ping` test)
+
+
+ For long sessions, consider adding a systemd service to maintain spoofing after disconnections.
