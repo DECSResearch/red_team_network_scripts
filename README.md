@@ -5,7 +5,7 @@
 | Script | Description | Last Updated | Documentation |
 |--------|-------------|--------------|---------------|
 | [arp_spoof.py](src/impersonation/arp_spoof.py) | Bidirectional ARP cache poisoning tool | 2024-02-19 | [README](#arp-spoofing) |
-| [brute_charset.py](src/flooding/bruteforce_char.py) | Alphabet-based brute force (a-zA-Z0-9!@#) | 2025-02-19 | [README](#brute-force) |
+| [brute_charset.py](src/flooding/bruteforce_char.py) | Alphabet-based brute force (a-zA-Z0-9!@#) | 2025-02-19 | [README](#alphabet-based-brute-force) |
 | [dict_attack.py](src/flooding/bruteforce_dict.py) | Dictionary attack with Top 150k passwords | 2025-02-19 | [Docs](#dict_attacks) |
 
 
@@ -32,7 +32,7 @@
 
 # Flooding
 
-## Alphabet-based brute force
+## Alphabet based brute force
 A python based SSH credential brute-forcing using character combinations.
 
 ### Current Implementation
