@@ -6,7 +6,7 @@
 |--------|-------------|--------------|---------------|
 | [arp_spoof.py](src/impersonation/arp_spoof.py) | Bidirectional ARP cache poisoning tool | 2024-02-19 | [README](#arp-spoofing) |
 | [brute_charset.py](src/flooding/bruteforce_char.py) | Alphabet-based brute force (a-zA-Z0-9!@#) | 2025-02-19 | [README](#alphabet-based-brute-force) |
-| [dict_attack.py](src/flooding/bruteforce_dict.py) | Dictionary attack with Top 150k passwords | 2025-02-19 | [Docs](#ssh-dictionary-attack-tool) |
+| [dict_attack.py](src/flooding/bruteforce_dict.py) | Dictionary attack with Top 150k passwords | 2025-02-19 | [README](#ssh-dictionary-attack-tool) |
 
 
 ## 🟡 In Progress
@@ -31,6 +31,34 @@
 > **Last Updated**: Date of last successful test  
 > **ETA**: Estimated completion date for current sprint
 
+## Attack Classification
+
+### Flooding Attacks  
+- **brute_charset.py**: Alphabet-based credential brute-forcing  
+- **dict_attack.py**: Dictionary-based password attacks  
+- **distributed_bruteforce.py**: Distributed credential cracking  
+- **ddos_botnet.py**: Coordinated HTTP flood attacks  
+- **dos.py**: Denial-of-service through HTTP flooding  
+- **apr_flood.py**: ARP request flooding  
+
+### Impersonation Attacks  
+- **arp_spoof.py**: ARP cache poisoning/MITM  
+- **Phishing**: Identity deception attacks  
+
+### Injection Attacks  
+- **keylogger.py**: System input interception  
+- **FIDA**: False data injection attacks  
+
+## Classification Rationale
+
+Based on standard network attack taxonomy:
+
+- **Flooding**: Focuses on resource exhaustion through traffic/request overload  
+- **Impersonation**: Utilizes identity deception and MITM techniques  
+- **Injection**: Involves malicious data insertion or system interference
+
+
+
 # Flooding
 
 ## Alphabet based brute force
@@ -41,6 +69,7 @@ A python based SSH credential brute-forcing using character combinations.
 - Full printable ASCII character set (100 chars)
 - Progressive length attempts (1-13 characters)
 - Visual progress tracking with `tqdm`
+- Automatic retry mechanism
 - Network error recovery system
 - 1-second SSH connection timeout
 - 2-second retry delay on exceptions
@@ -60,9 +89,18 @@ Brute Force Progress: 0%|           | 0/100 [00:00<?, ?it/s]
 | Parameter | Default | Description |
 |-----------|---------|-------------|
 | `min_length` | 1 | Minimum password segments |
-| `max_length` | 10 | Maximum password combinations |
+| `max_length` | 13 | Maximum password combinations |
 | `timeout` | 1s | SSH connection timeout |
 | `retry_delay` | 2s | Network error cooldown |
+
+## Performance Notes
+- Theoretical attempt count: 2.27e25 combinations (for 13 chars)
+- Practical limitations:
+- Network latency impacts speed
+- SSH handshake overhead
+- Lockout policies (not handled)
+- Hardware limitations
+
 
 ### Troubleshooting
 1. **Paramiko installation failures?**
@@ -116,6 +154,18 @@ Brute Force Progress: 12%|██▏ | 1200/10000 [00:45<05:12, 26.21it/s]
 |-----------|---------|-------------|
 | `timeout` | 1s | SSH connection timeout |
 | `retry_delay` | 2s | Network error cooldown |
+
+
+**Flow Explanation**  
+1. **Dictionary Loading**: Reads `InsidePro.dic` containing password candidates  
+2. **List Generation**: Creates attack permutations from dictionary entries  
+3. **Parallel Processing**: Distributes workload across all CPU cores  
+4. **Connection Phase**: Each worker performs:  
+   - SSH handshake with timeout  
+   - Authentication attempt  
+   - Error classification (retry vs discard)  
+5. **Result Handling**: Successful finds terminate all workers immediately  
+
 
 ### Troubleshooting
 **Dictionary Load Failures**  
