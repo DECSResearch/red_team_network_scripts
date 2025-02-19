@@ -1,3 +1,27 @@
+# Scripts Status
+
+## 🟢 Functioning Scripts
+
+| Script | Description | Last Updated | Documentation |
+|--------|-------------|--------------|---------------|
+| [arp_spoof.py](src/impersonation/arp_spoof.py) | Bidirectional ARP cache poisoning tool | 2024-02-19 | [README](#arp-spoofing) |
+
+
+## 🟡 In Progress
+
+| Script | Description | Progress | ETA |
+|--------|-------------|----------|-----|
+| [keylogger.py](keylogger.py) | Cross-platform input capture module | _ | _ |
+
+## Key
+- 🟢 = Stable/Production Ready
+- 🟡 = Active Development
+- 🔴 = Broken/Needs Fixing
+- ⚫ = Deprecated
+
+> **Legend**  
+> **Last Updated**: Date of last successful test  
+> **ETA**: Estimated completion date for current sprint
 # Impersonation
 ## ARP Spoofing
 
