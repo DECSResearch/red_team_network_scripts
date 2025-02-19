@@ -33,8 +33,50 @@
 # Flooding
 
 ## Alphabet-based brute force
+A python based SSH credential brute-forcing using character combinations.
+
+### Current Implementation
+- CLI configuration via argparse for IP/user inputs
+- Full printable ASCII character set (100 chars)
+- Progressive length attempts (1-13 characters)
+- Visual progress tracking with `tqdm`
+- Network error recovery system
+- 1-second SSH connection timeout
+- 2-second retry delay on exceptions
+
+### Usage
+1. **Install dependencies**: `pip3 install paramiko tqdm`
+
+2. **Execute brute force attack**: `python3 bruteforce.py <target_ip> <username>`
+
+Example: `python3 bruteforce.py 192.168.1.45 admin`
+
+3. **Monitor progress**:
+[*] Starting brute force attack on 192.168.1.45 with username admin
+Brute Force Progress: 0%|           | 0/100 [00:00<?, ?it/s]
 
 
+### Troubleshooting
+1. **Paramiko installation failures?**
+- Update pip: `python3 -m pip install --upgrade pip`
+- Install development tools: `sudo apt install python3-dev libffi-dev`
+
+2. **Connection timeouts?**
+- Verify target SSH port accessibility: `nc -zv <IP> 22`
+- Ping device
+- Check local firewall rules
+
+3. **High failure rate?**
+- Confirm username validity first
+- Check target's failed attempt thresholds
+- Consider narrowing character set in code
+
+4. **Performance issues?**
+- Remove progress bar (`tqdm`) for raw speed
+- Increase timeout value in `ssh_connect()`
+
+
+****
 
 # Impersonation
 ## ARP Spoofing
