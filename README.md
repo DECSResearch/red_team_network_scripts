@@ -1,3 +1,34 @@
+# Scripts Status
+
+## 🟢 Functioning Scripts
+
+| Script | Description | Last Updated | Documentation |
+|--------|-------------|--------------|---------------|
+| [arp_spoof.py](src/impersonation/arp_spoof.py) | Bidirectional ARP cache poisoning tool | 2024-02-19 | [README](#arp-spoofing) |
+| [brute_charset.py](src/flooding/bruteforce_char.py) | Alphabet-based brute force (a-zA-Z0-9!@#) | 2025-02-19 | [README](#brute-force) |
+| [dict_attack.py](src/flooding/bruteforce_dict.py) | Dictionary attack with Top 150k passwords | 2025-02-19 | [Docs](#dict_attacks) |
+
+
+## 🟡 In Progress
+
+| Script | Description | Progress | ETA |
+|--------|-------------|----------|-----|
+| [keylogger.py](add/keylogger.py) | Cross-platform input capture module | _ | _ |
+| [distributed_bruteforce.py](pplx://action/followup) | WordPress credential brute-forcing via hijacked browsers |  |  |
+| [ddos_botnet.py](pplx://action/followup) | Multi-threaded HTTP flood with IP spoofing |  |  |
+| [dos.py](pplx://action/followup) | HTTP flood with IP spoofing |  |  |
+| [Phishing](pplx://action/followup) | _ |  |  |
+| [FIDA](pplx://action/followup) | FDIA |  |  |
+
+## Key
+- 🟢 = Stable/Production Ready
+- 🟡 = Active Development
+- 🔴 = Broken/Needs Fixing
+- ⚫ = Deprecated
+
+> **Legend**  
+> **Last Updated**: Date of last successful test  
+> **ETA**: Estimated completion date for current sprint
 # Impersonation
 ## ARP Spoofing
 
