@@ -48,6 +48,8 @@ def ssh_connect(ip_addr,username,password):
     
     
 if __name__ == "__main__":
+    ip_addr = '172.16.233.149'
+    user_name = 'c2srnano13'
     success,password=bruteforce_ssh('172.16.233.149','c2srnano13')
     if success:
         print(f"Password found: {password}")

