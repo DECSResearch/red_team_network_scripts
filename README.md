@@ -19,7 +19,8 @@
 | [dos.py](pplx://action/followup) | HTTP flood with IP spoofing |  |  |
 | [Phishing](pplx://action/followup) | _ |  |  |
 | [FIDA](pplx://action/followup) | FDIA |  |  |
-| [apr_storm.py](pplx://action/followup) | Flood packets of ARP requests |  |  |
+| [apr_storm_targeted.py](pplx://action/followup) | Flood packets of ARP requests to disrupt the device communications |  |  |
+| [apr_storm_network.py](pplx://action/followup) | Flood packets of ARP requests to disrupt the network communications |  |  |
 
 ## Key
 - 🟢 = Stable/Production Ready
