@@ -1,5 +1,11 @@
 ## Version 0.0.2
 ARP spoof working, added ip forwarding and ip_table change feature
+**Changes from previous version:**
+- Removed manual IP forwarding steps (now automated)
+- Added iptables rule management documentation
+- Updated troubleshooting for new features
+- Simplified usage instructions
+- Removed 2-second interval mention (now single-shot with sleep)
 
 ## Version 0.0.1
 ARP table is being spoofed

@@ -4,7 +4,7 @@
 
 | Script | Description | Last Updated | Documentation |
 |--------|-------------|--------------|---------------|
-| 🔴[arp_spoof.py](src/impersonation/arp_spoof.py) | Bidirectional ARP cache poisoning tool | 2024-02-19 | [README](#arp-spoofing) |
+| [arp_spoof.py](src/impersonation/arp_spoof.py) | Bidirectional ARP cache poisoning tool | 2024-02-21 | [README](#arp-spoofing) |
 | [brute_charset.py](src/flooding/bruteforce_char.py) | Alphabet-based brute force (a-zA-Z0-9!@#) | 2025-02-19 | [README](#alphabet-based-brute-force) |
 | [dict_attack.py](src/flooding/bruteforce_dict.py) | Dictionary attack with Top 150k passwords | 2025-02-19 | [README](#ssh-dictionary-attack-tool) |
 
@@ -18,7 +18,7 @@
 | [ddos_botnet.py](pplx://action/followup) | Multi-threaded HTTP flood with IP spoofing |  |  |
 | [dos.py](pplx://action/followup) | HTTP flood with IP spoofing |  |  |
 | [Phishing](pplx://action/followup) | _ |  |  |
-| [FIDA](pplx://action/followup) | FDIA |  |  |
+| [FIDA](pplx://action/followup) | FDIA |  | 2025-02-24 |
 | [apr_storm_targeted.py](pplx://action/followup) | Flood packets of ARP requests to disrupt the device communications |  |  |
 | [apr_storm_network.py](pplx://action/followup) | Flood packets of ARP requests to disrupt the network communications |  |  |
 
@@ -212,26 +212,31 @@ A Python-based ARP cache poisoning tool for demonstrating MITM (Man-in-the-Middl
 - CLI configuration with argparse for targets/interface
 - Bidirectional ARP spoofing
 - Automatic ARP table restoration on exit (Ctrl+C)
-- Configurable target IP addresses
-- 2-second refresh interval
+- IP forwarding automation (enables/disables automatically)
+- Iptables rule management for traffic forwarding
+- Configurable network interface and target IPs
+
 
 ### Usage
 1. **Start monitoring** (new terminal):
 ```sudo tcpdump -i eth0 -nnv "host 192.168.1.16 and host 192.168.1.23"```
-2. **Enable IP forwarding)** (if not already set):
-```sudo sysctl -w net.ipv4.ip_forward=1``` # Temporary enable
-For persistence: add 'net.ipv4.ip_forward=1' to /etc/sysctl.conf
 
-4. **Run the ARP spoofer**:
+2. **Run the ARP spoofer**:
 ```sudo python3 arp_spoof.py 192.168.1.16 192.168.1.23 -i eth0```
 
 
-5. **Verify ARP table changes** on target devices:
+3. **Verify ARP table changes** on target devices:
 On target_1 (192.168.1.16):
 ```arp -n | grep 192.168.1.23```
 
 On target_2 (192.168.1.23):
 ```arp -n | grep 192.168.1.16```
+
+### Automatic Management
+The script now handles these automatically:
+- Enables/disables IP forwarding (`net.ipv4.ip_forward`)
+- Adds/removes iptables rules for ICMP/TCP forwarding
+- Restores original MAC addresses on exit
 
 
 ### Key Commands
@@ -250,11 +255,13 @@ On target_2 (192.168.1.23):
 - Ensure targets are on same VLAN
 - Check physical connectivity
 
-3. **No traffic visible?**
-- Confirm IP forwarding is enabled:
-     ```sudo sysctl -w net.ipv4.ip_forward=1```
-- Check correct network interface
+3. **Traffic not forwarding?**
+- Confirm script output shows enabled IP forwarding
+- Check iptables rules exist: `sudo iptables -L FORWARD -v`
 - Verify target IPs are active (`ping` test)
 
+4. **ARP tables not restoring?**
+- Manually run restoration command: `arp -s TARGET_IP TARGET_MAC`
 
- For long sessions, consider adding a systemd service to maintain spoofing after disconnections.
+ ### Advanced Use
+For long sessions, consider creating a systemd service to maintain spoofing after disconnections. Add these iptables rules permanently with: `sudo iptables-save > /etc/iptables/rules.v4`
