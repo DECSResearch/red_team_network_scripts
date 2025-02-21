@@ -1,3 +1,6 @@
+## Version 0.0.2
+ARP spoof working, added ip forwarding and ip_table change feature
+
 ## Version 0.0.1
 ARP table is being spoofed
 BUT *ARP not sending packets*

