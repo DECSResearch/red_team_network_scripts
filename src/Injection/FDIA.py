@@ -37,14 +37,12 @@ def modify_packet(scapy_packet):
 
 
 def setup_iptables():
-    # Create specific rules
-    os.system('iptables -I INPUT -p tcp --sport 30502 -s 192.168.1.14 -j NFQUEUE --queue-num 1')
-    os.system('iptables -I OUTPUT -p tcp --sport 30502 -s 192.168.1.14 -j NFQUEUE --queue-num 1')
+    os.system('iptables -I INPUT -p tcp --sport 30502 -s 192.168.1.15 -j NFQUEUE --queue-num 1')
+    os.system('iptables -I OUTPUT -p tcp --sport 30502 -s 192.168.1.15 -j NFQUEUE --queue-num 1')
 
 def cleanup_iptables():
-    # Remove specific rules
-    os.system('iptables -D INPUT -p tcp --sport 30502 -s 192.168.1.14 -j NFQUEUE --queue-num 1')
-    os.system('iptables -D OUTPUT -p tcp --sport 30502 -s 192.168.1.14 -j NFQUEUE --queue-num 1')
+    os.system('iptables -D INPUT -p tcp --sport 30502 -s 192.168.1.15 -j NFQUEUE --queue-num 1')
+    os.system('iptables -D OUTPUT -p tcp --sport 30502 -s 192.168.1.15 -j NFQUEUE --queue-num 1')
 
 try:
     setup_iptables()
