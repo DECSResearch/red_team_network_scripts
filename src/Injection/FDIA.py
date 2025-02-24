@@ -46,17 +46,20 @@ def cleanup_iptables():
 
 try:
     setup_iptables()
+    print("[*] IPTables rules set")
     nfqueue = NetfilterQueue()
+    print("[*] Creating NFQUEUE")
     nfqueue.bind(1, modify_packet)
-    
     print("[*] Starting NFQUEUE")
+    print("[*] Waiting for packets")
     nfqueue.run()
 except KeyboardInterrupt:
     print("[*] Stopping NFQUEUE")
 finally:
     nfqueue.unbind()
     cleanup_iptables()
-    os.system('iptables -D FORWARD -j NFQUEUE --queue-num 1')
+    print("[*] IPTables rules removed")
+    sys.exit(0)
 
 
 
@@ -67,3 +70,10 @@ finally:
 # Undo Rules
 #sudo iptables -D INPUT -p tcp --sport 30502 -s 192.168.1.14 -j NFQUEUE --queue-num 1
 #sudo iptables -D OUTPUT -p tcp --sport 30502 -s 192.168.1.14 -j NFQUEUE --queue-num 1
+
+
+#4. Queue Conflict
+#Error: Failed to create queue 0
+#Resolution:
+#sudo rm /run/xtables.lock  # Clear stale lock
+#sudo pkill -f NFQUEUE      # Kill existing queue users
