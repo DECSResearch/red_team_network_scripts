@@ -4,7 +4,7 @@
 
 | Script | Description | Last Updated | Documentation |
 |--------|-------------|--------------|---------------|
-| [arp_spoof.py](src/impersonation/arp_spoof.py) | Bidirectional ARP cache poisoning tool | 2024-02-21 | [README](#arp-spoofing) |
+| [arp_spoof.py](src/impersonation/arp_spoof.py) | Bidirectional ARP cache poisoning tool | 2025-02-24 | [README](#arp-spoofing) |
 | [brute_charset.py](src/flooding/bruteforce_char.py) | Alphabet-based brute force (a-zA-Z0-9!@#) | 2025-02-19 | [README](#alphabet-based-brute-force) |
 | [dict_attack.py](src/flooding/bruteforce_dict.py) | Dictionary attack with Top 150k passwords | 2025-02-19 | [README](#ssh-dictionary-attack-tool) |
 
