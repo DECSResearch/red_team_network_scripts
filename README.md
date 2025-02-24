@@ -211,6 +211,7 @@ A Python-based ARP cache poisoning tool for demonstrating MITM (Man-in-the-Middl
 ### Current Implementation 
 - CLI configuration with argparse for targets/interface
 - Bidirectional ARP spoofing
+- Configurable spoofing intervals
 - Automatic ARP table restoration on exit (Ctrl+C)
 - IP forwarding automation (enables/disables automatically)
 - Iptables rule management for traffic forwarding
@@ -223,6 +224,9 @@ A Python-based ARP cache poisoning tool for demonstrating MITM (Man-in-the-Middl
 
 2. **Run the ARP spoofer**:
 ```sudo python3 arp_spoof.py 192.168.1.16 192.168.1.23 -i eth0```
+
+*Persistent spoofing* (resend every 5 seconds)
+```sudo python3 arp_spoof.py 192.168.1.16 192.168.1.23 -i eth0 -r 5```
 
 
 3. **Verify ARP table changes** on target devices:
@@ -239,12 +243,13 @@ The script now handles these automatically:
 - Restores original MAC addresses on exit
 
 
-### Key Commands
-| Command | Purpose |
-|---------|---------|
-| `sudo tcpdump -i eth0 -nnv "host 192.168.1.16 and host 192.168.1.23"` | Monitor target traffic |
-| `arp -n` | Check ARP table entries |
-| `sysctl -w net.ipv4.ip_forward=1` | Enable persistent packet forwarding |
+#### Command Options
+| Option | Description |
+|--------|-------------|
+| `target1` | IP address of first target (required) |
+| `target2` | IP address of second target (required) |
+| `-i INTERFACE` | Network interface (default: eth0) |
+| `-r SECONDS` | Resend ARP spoofs at interval (0=once, default:0) |
 
 ### Troubleshooting
 1. **Permission errors?**
@@ -262,6 +267,10 @@ The script now handles these automatically:
 
 4. **ARP tables not restoring?**
 - Manually run restoration command: `arp -s TARGET_IP TARGET_MAC`
+
+5. **Traffic stops forwarding after time?**  
+→ Combine `-r 5` with persistent iptables rules:  
+`sudo iptables-save > /etc/iptables/rules.v4`
 
  ### Advanced Use
 For long sessions, consider creating a systemd service to maintain spoofing after disconnections. Add these iptables rules permanently with: `sudo iptables-save > /etc/iptables/rules.v4`

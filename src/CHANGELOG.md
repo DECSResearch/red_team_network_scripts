@@ -1,3 +1,8 @@
+## Version 0.03
+Fixed iptables rule deletion syntax by removing erroneous -I flag in removal commands.
+Ensures rule removal matches original insertion parameters for proper firewall state restoration.
+Recurrent spoofing - New `recursive` argument (seconds between ARP resends)  
+
 ## Version 0.0.2
 ARP spoof working, added ip forwarding and ip_table change feature
 **Changes from previous version:**
