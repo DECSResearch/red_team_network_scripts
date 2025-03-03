@@ -22,6 +22,8 @@
 | [arp_storm_targeted.py](pplx://action/followup) | Flood packets of ARP requests to disrupt the device communications | HK | 2025-02-24 |
 | [arp_storm_network.py](pplx://action/followup) | Flood packets of ARP requests to disrupt the network communications |  |  |
 | [arp_eavesdrop.py](pplx://action/followup) | Passive Network packet collection |  |  |
+| [reverse_shell.py](pplx://action/followup) | ADD |  |  |
+| [RCE.py](pplx://action/followup) | Remote Code Execution |  |  |
 
 ## Key
 - 🟢 = Stable/Production Ready
