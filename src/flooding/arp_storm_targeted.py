@@ -68,7 +68,7 @@ def start_attack(to_ip, iface, multi,devices):
 if __name__ == "__main__":
     
     parser = argparse.ArgumentParser(description='ARP Storm')
-    parser.add_argument('target', help='IP of first target')
+    parser.add_argument('target', help='IP of target')
     parser.add_argument('-i', '--interface', default='eth0',
                        help='Network interface (default: eth0)')
     #parser.add_argument('-m', '--multi', default=True,
