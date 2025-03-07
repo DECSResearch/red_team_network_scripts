@@ -298,7 +298,7 @@ A network disruption tool that performs ARP cache poisoning to isolate target de
 
 ### Usage
 1. **Install dependencies** (Scapy required):  
-pip3 install scapy
+`pip3 install scapy`
 2. **Run Attack**
    - Basic Attack:
      `sudo python3 arp_blackout.py 192.168.1.15`
