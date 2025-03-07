@@ -15,9 +15,9 @@
 | Script | Description | Progress | ETA |
 |--------|-------------|----------|-----|
 | [keylogger.py](add/keylogger.py) | Cross-platform input capture module | _ | _ |
-| [distributed_bruteforce.py](pplx://action/followup) | WordPress credential brute-forcing via hijacked browsers |  |  |
-| [ddos_botnet.py](pplx://action/followup) | Multi-threaded HTTP flood with IP spoofing |  |  |
-| [dos.py](pplx://action/followup) | HTTP flood with IP spoofing |  |  |
+| [distributed_bruteforce.py](pplx://action/followup) | - |  |  |
+| [ddos_botnet.py](pplx://action/followup) | Multi-threaded flood with IP spoofing |  |  |
+| [dos.py](pplx://action/followup) | ICMP flood with IP spoofing |  |  |
 | [Phishing](pplx://action/followup) | _ |  |  |
 | [FIDA](pplx://action/followup) | FDIA | HK | 2025-02-24 |
 | [arp_storm_targeted.py](pplx://action/followup) | Flood packets of ARP requests to disrupt the device communications |  |  |
