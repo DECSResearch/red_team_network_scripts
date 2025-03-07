@@ -1,6 +1,6 @@
 # Scripts Status
 
-## 🟢 Functioning Scripts
+## Functioning Scripts
 
 | Script | Description | Last Updated | Documentation |
 |--------|-------------|--------------|---------------|
@@ -10,14 +10,14 @@
 | [arp_blackout.py](src/impersonation/arp_blackout.py) | ARP cache poisoning tool | 2025-03-07| [README](#arp-blackout-attack-tool)|
 
 
-## 🟡 In Progress
+## In Progress
 
 | Script | Description | Progress | ETA |
 |--------|-------------|----------|-----|
 | [keylogger.py](add/keylogger.py) | Cross-platform input capture module | _ | _ |
-| [distributed_bruteforce.py](pplx://action/followup) | WordPress credential brute-forcing via hijacked browsers |  |  |
-| [ddos_botnet.py](pplx://action/followup) | Multi-threaded HTTP flood with IP spoofing |  |  |
-| [dos.py](pplx://action/followup) | HTTP flood with IP spoofing |  |  |
+| [distributed_bruteforce.py](pplx://action/followup) | - |  |  |
+| [ddos_botnet.py](pplx://action/followup) | Multi-threaded flood with IP spoofing |  |  |
+| [dos.py](pplx://action/followup) | ICMP flood with IP spoofing |  |  |
 | [Phishing](pplx://action/followup) | _ |  |  |
 | [FIDA](pplx://action/followup) | FDIA | HK | 2025-02-24 |
 | [arp_storm_targeted.py](pplx://action/followup) | Flood packets of ARP requests to disrupt the device communications |  |  |
@@ -26,11 +26,6 @@
 | [reverse_shell.py](pplx://action/followup) | ADD |  |  |
 | [RCE.py](pplx://action/followup) | Remote Code Execution |  |  |
 
-## Key
-- 🟢 = Stable/Production Ready
-- 🟡 = Active Development
-- 🔴 = Broken/Needs Fixing
-- ⚫ = Deprecated
 
 > **Legend**  
 > **Last Updated**: Date of last successful test  
