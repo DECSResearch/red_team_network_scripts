@@ -1,6 +1,6 @@
 # Scripts Status
 
-## 🟢 Functioning Scripts
+## Functioning Scripts
 
 | Script | Description | Last Updated | Documentation |
 |--------|-------------|--------------|---------------|
@@ -10,7 +10,7 @@
 | [arp_blackout.py](src/impersonation/arp_blackout.py) | ARP cache poisoning tool | 2025-03-07| [README](#arp-blackout-attack-tool)|
 
 
-## 🟡 In Progress
+## In Progress
 
 | Script | Description | Progress | ETA |
 |--------|-------------|----------|-----|
@@ -26,11 +26,6 @@
 | [reverse_shell.py](pplx://action/followup) | ADD |  |  |
 | [RCE.py](pplx://action/followup) | Remote Code Execution |  |  |
 
-## Key
-- 🟢 = Stable/Production Ready
-- 🟡 = Active Development
-- 🔴 = Broken/Needs Fixing
-- ⚫ = Deprecated
 
 > **Legend**  
 > **Last Updated**: Date of last successful test  
