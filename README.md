@@ -320,9 +320,10 @@ pip3 install scapy
 
 ### Technical Enhancements
 
-** Unique MAC Detection **
+**Unique MAC Detection**
 -  Avoid generating a spoofed MAC address that's already present on the network.
-** Repeat Broadcast **
+  
+**Repeat Broadcast**
 - Ensure persistent ARP poisoning by re-sending spoofed ARP packets at regular intervals.
 
 ### Post-Attack Validation
