@@ -1,3 +1,15 @@
+## Version 1.0.0
+Updated Everything in Readme.md file.
+ARP_Blackout Working.
+**Unique MAC Detection** -  Avoid generating a spoofed MAC address that's already present on the network.
+**Repeat Broadcast** - Ensure persistent ARP poisoning by re-sending spoofed ARP packets at regular intervals.
+FDIA with Modification function working.
+
+*Next steps*
+Integrate FIDA model funtions with the FIDA code.
+Make ARP and FDIA run in parallel.
+Update ReadME file for FDIA.
+
 ## Version 0.03
 Fixed iptables rule deletion syntax by removing erroneous -I flag in removal commands.
 Ensures rule removal matches original insertion parameters for proper firewall state restoration.
