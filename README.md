@@ -7,6 +7,7 @@
 | [arp_spoof.py](src/impersonation/arp_spoof.py) | Bidirectional ARP cache poisoning tool | 2025-02-24 | [README](#arp-spoofing) |
 | [brute_charset.py](src/flooding/bruteforce_char.py) | Alphabet-based brute force (a-zA-Z0-9!@#) | 2025-02-19 | [README](#alphabet-based-brute-force) |
 | [dict_attack.py](src/flooding/bruteforce_dict.py) | Dictionary attack with Top 150k passwords | 2025-02-19 | [README](#ssh-dictionary-attack-tool) |
+| [arp_blackout.py](src/impersonation/arp_blackout.py) | ARP cache poisoning tool | 2025-03-07| [README](#arp-blackout-attack-tool)|
 
 
 ## 🟡 In Progress
@@ -19,7 +20,7 @@
 | [dos.py](pplx://action/followup) | HTTP flood with IP spoofing |  |  |
 | [Phishing](pplx://action/followup) | _ |  |  |
 | [FIDA](pplx://action/followup) | FDIA | HK | 2025-02-24 |
-| [arp_storm_targeted.py](pplx://action/followup) | Flood packets of ARP requests to disrupt the device communications | HK | 2025-02-24 |
+| [arp_storm_targeted.py](pplx://action/followup) | Flood packets of ARP requests to disrupt the device communications |  |  |
 | [arp_storm_network.py](pplx://action/followup) | Flood packets of ARP requests to disrupt the network communications |  |  |
 | [arp_eavesdrop.py](pplx://action/followup) | Passive Network packet collection |  |  |
 | [reverse_shell.py](pplx://action/followup) | ADD |  |  |
@@ -138,7 +139,7 @@ A multi-process Python script for performing high-speed dictionary attacks again
 - **Progress visualization** with `tqdm` integration
 - **Clean exit handling** via `finally` clause
 
-### 📁 File Requirements
+### File Requirements
 - `InsidePro.dic` password dictionary in working directory
 - Custom wordlist support (modify `alnum` loading)
 
@@ -277,3 +278,64 @@ The script now handles these automatically:
 
  ### Advanced Use
 For long sessions, consider creating a systemd service to maintain spoofing after disconnections. Add these iptables rules permanently with: `sudo iptables-save > /etc/iptables/rules.v4`
+
+## ARP Blackout Attack Tool
+
+![Python](https://img.shields.io/badge/Python-3.8%2B-blue)
+![Scapy](https://img.shields.io/badge/Scapy-2.5.0%2B-orange)
+
+A network disruption tool that performs ARP cache poisoning to isolate target devices from the local network. Built with Scapy for educational/penetration testing purposes.
+
+### Key Features 
+
+- **Network Discovery**  
+  Auto-scans subnet to map active IP/MAC pairs
+- **MAC Randomization & Unique MAC Detection**  
+  Generates vendor-plausible spoofed addresses using common OUIs and ensures uniqueness by checking against the discovered devices.
+- **Bidirectional Spoofing**  
+  Poisons ARP caches of all network devices toward target.
+- **Repeat Broadcast**  
+  Continuously sends spoofed ARP packets at configurable intervals to maintain ARP cache poisoning.
+- **Self-Healing Network**  
+  Automatic ARP table restoration on exit (Ctrl+C)
+- **Stealth Mode**  
+  Randomized attack intervals and persistent spoofing
+
+### Usage
+1. **Install dependencies** (Scapy required):  
+pip3 install scapy
+2. **Run Attack**
+   - Basic Attack:
+     `sudo python3 arp_blackout.py 192.168.1.15`
+   - Advanced Options:
+     Custom interface and 15-second interval:
+     `sudo python3 arp_blackout.py 192.168.1.25 -i wlan0 -t 15`
+3. **Check target's ARP table changes**:  
+`arp -n | grep 192`
+4. **Monitor network traffic during attack**:
+`sudo tcpdump -i eth0 arp -vv`
+
+### Command Options
+| Option | Description | Default |
+|--------|-------------|---------|
+| `target` | Target IP address | *Required* |
+| `-i INTERFACE` | Network interface | `eth0` |
+| `-t SECONDS` | Spoofing interval | `10` |
+
+
+### Technical Enhancements
+
+** Unique MAC Detection **
+-  Avoid generating a spoofed MAC address that's already present on the network.
+** Repeat Broadcast **
+- Ensure persistent ARP poisoning by re-sending spoofed ARP packets at regular intervals.
+
+### Post-Attack Validation
+1. Confirm target regains network connectivity
+2. Verify original MAC addresses reappear in ARP tables
+
+### Troubleshooting
+**Common Issues**:
+- `Target not found`: Ensure device is online (`ping -c 4 target_ip`)
+- `Permission denied`: Run with `sudo` privileges
+- `Spoofing ineffective`: Enable IP forwarding (`echo 1 > /proc/sys/net/ipv4/ip_forward`)
