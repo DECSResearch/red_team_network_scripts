@@ -30,23 +30,6 @@
 > **Last Updated**: Date of last successful test  
 > **ETA**: Estimated completion date for current sprint
 
-## Attack Classification
-
-### Flooding Attacks  
-- **brute_charset.py**: Alphabet-based credential brute-forcing  
-- **dict_attack.py**: Dictionary-based password attacks  
-- **distributed_bruteforce.py**: Distributed credential cracking  
-- **ddos_botnet.py**: Coordinated HTTP flood attacks  
-- **dos.py**: Denial-of-service through HTTP flooding  
-- **apr_flood.py**: ARP request flooding  
-
-### Impersonation Attacks  
-- **arp_spoof.py**: ARP cache poisoning/MITM  
-- **Phishing**: Identity deception attacks  
-
-### Injection Attacks  
-- **keylogger.py**: System input interception  
-- **FIDA**: False data injection attacks  
 
 ## Classification Rationale
 
