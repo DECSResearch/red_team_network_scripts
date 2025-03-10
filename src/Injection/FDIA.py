@@ -203,10 +203,3 @@ if __name__ == "__main__":
         cleanup_iptables(ip,port)
         print("[*] IPTables rules removed")
         sys.exit(0)
-
-
-    #4. Queue Conflict
-    #Error: Failed to create queue 0
-    #Resolution:
-    #sudo rm /run/xtables.lock  # Clear stale lock
-    #sudo pkill -f NFQUEUE      # Kill existing queue users

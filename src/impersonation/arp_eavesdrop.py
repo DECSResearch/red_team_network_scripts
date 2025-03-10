@@ -131,6 +131,3 @@ if __name__ == "__main__":
         print(f"[+] Captured {len(captured_packets)} packets")
         print(f"[+] Packet capture saved to {pcap_file}")
         sys.exit(0)
-
-
-#sudo python3 arp_cap.py 192.168.1.15 192.168.1.23 -o captured_traffic.pcap
