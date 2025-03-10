@@ -2,13 +2,14 @@
 
 ## Functioning Scripts
 
-| Script | Description | Last Updated | Documentation |
-|--------|-------------|--------------|---------------|
-| [arp_spoof.py](src/impersonation/arp_spoof.py) | Bidirectional ARP cache poisoning tool | 2025-02-24 | [README](#arp-spoofing) |
-| [brute_charset.py](src/flooding/bruteforce_char.py) | Alphabet-based brute force (a-zA-Z0-9!@#) | 2025-02-19 | [README](#alphabet-based-brute-force) |
-| [dict_attack.py](src/flooding/bruteforce_dict.py) | Dictionary attack with Top 150k passwords | 2025-02-19 | [README](#ssh-dictionary-attack-tool) |
-| [arp_blackout.py](src/impersonation/arp_blackout.py) | ARP cache poisoning tool | 2025-03-07| [README](#arp-blackout-attack-tool)|
-
+| Script | Classification | Description | Last Updated | Documentation |
+|--------|---------------|-------------|--------------|---------------|
+| [arp_spoof.py](src/impersonation/arp_spoof.py) | Impersonation | Bidirectional ARP cache poisoning tool | 2025-02-24 | [README](#arp-spoofing) |
+| [brute_charset.py](src/flooding/bruteforce_char.py) | Flooding | Alphabet-based brute force (a-zA-Z0-9!@#) | 2025-02-19 | [README](#alphabet-based-brute-force) |
+| [dict_attack.py](src/flooding/bruteforce_dict.py) | Flooding | Dictionary attack with Top 150k passwords | 2025-02-19 | [README](#ssh-dictionary-attack-tool) |
+| [arp_blackout.py](src/impersonation/arp_blackout.py) | Impersonation | Advanced ARP cache poisoning | 2025-03-07| [README](#arp-blackout-attack-tool)|
+| [FDIA.py](src/Injection/FDIA.py) | Injection | TCP/ModBus protocol data manipulation tool | 2025-03-10 | [README](#false-data-injection-attack) |
+| [arp_eavesdrop.py](src/impersonation/arp_eavesdrop.py) | Impersonation | Passive network traffic sniffer | 2025-03-10 | [README](#arp-eavesdropping-attack) |
 
 ## In Progress
 
@@ -19,10 +20,8 @@
 | [ddos_botnet.py](pplx://action/followup) | Multi-threaded flood with IP spoofing |  |  |
 | [dos.py](pplx://action/followup) | ICMP flood with IP spoofing |  |  |
 | [Phishing](pplx://action/followup) | _ |  |  |
-| [FIDA](pplx://action/followup) | FDIA | HK | 2025-02-24 |
 | [arp_storm_targeted.py](pplx://action/followup) | Flood packets of ARP requests to disrupt the device communications |  |  |
 | [arp_storm_network.py](pplx://action/followup) | Flood packets of ARP requests to disrupt the network communications |  |  |
-| [arp_eavesdrop.py](pplx://action/followup) | Passive Network packet collection |  |  |
 | [reverse_shell.py](pplx://action/followup) | ADD |  |  |
 | [RCE.py](pplx://action/followup) | Remote Code Execution |  |  |
 
@@ -239,7 +238,7 @@ On target_2 (192.168.1.23):
 The script now handles these automatically:
 - Enables/disables IP forwarding (`net.ipv4.ip_forward`)
 - Adds/removes iptables rules for ICMP/TCP forwarding
-- Restores original MAC addresses on exit
+- NFqueue unbind
 
 
 #### Command Options
@@ -275,9 +274,6 @@ The script now handles these automatically:
 For long sessions, consider creating a systemd service to maintain spoofing after disconnections. Add these iptables rules permanently with: `sudo iptables-save > /etc/iptables/rules.v4`
 
 ## ARP Blackout Attack Tool
-
-![Python](https://img.shields.io/badge/Python-3.8%2B-blue)
-![Scapy](https://img.shields.io/badge/Scapy-2.5.0%2B-orange)
 
 A network disruption tool that performs ARP cache poisoning to isolate target devices from the local network. Built with Scapy for educational/penetration testing purposes.
 
@@ -335,3 +331,181 @@ A network disruption tool that performs ARP cache poisoning to isolate target de
 - `Target not found`: Ensure device is online (`ping -c 4 target_ip`)
 - `Permission denied`: Run with `sudo` privileges
 - `Spoofing ineffective`: Enable IP forwarding (`echo 1 > /proc/sys/net/ipv4/ip_forward`)
+
+## ARP Eavesdropping Attack
+
+A Python-based network traffic interceptor that combines ARP spoofing with packet capture capabilities. This tool allows for real-time MITM (Man-in-the-Middle) positioning to passively collect and save all traffic between two network endpoints for later analysis.
+
+### Current Implementation
+
+- **Bidirectional ARP Spoofing** to intercept traffic between two hosts
+- **Concurrent Packet Capture** with multi-threaded operation
+- **PCAP Export** for offline analysis with Wireshark or other tools
+- **Automatic Network Configuration** of IP forwarding and iptables
+- **Clean Network Restoration** upon exit
+- **Flexible Timing Controls** for periodic ARP packet refreshes
+
+### Usage
+1. **Install dependencies** (Scapy required):  `pip3 install scapy`
+2. **Basic usage**:`sudo python3 arp_eavesdrop.py 192.168.1.15 192.168.1.23`
+3. **Custom interface and output file**:`sudo python3 arp_eavesdrop.py 192.168.1.15 192.168.1.23 -i wlan0 -o custom_capture.pcap`
+
+4. **With recursive ARP spoofing every 5 seconds**:` sudo python3 arp_eavesdrop.py 192.168.1.15 192.168.1.23 -r 5`
+
+### Configuration Options
+
+| Option | Description | Default |
+|--------|-------------|---------|
+| `target1` | First target IP address (required) | - |
+| `target2` | Second target IP address (required) | - |
+| `-i/--interface` | Network interface to use | eth0 |
+| `-r/--recursive` | Seconds between ARP refreshes (0=once) | 0 |
+| `-o/--output` | Output PCAP filename | captured_traffic.pcap |
+
+### Technical Operation
+
+1. **Network Preparation**:
+   - Enables IP forwarding in Linux kernel
+   - Configures iptables to allow forwarded traffic
+
+2. **ARP Cache Poisoning**:
+   - Sends crafted ARP packets to both targets
+   - Convinces each target that the attacker's MAC is associated with the other target's IP
+   - Optionally refreshes ARP cache periodically to maintain the attack
+
+3. **Traffic Capture**:
+   - Launches a separate thread for packet sniffing
+   - Collects all packets passing through the attack machine
+   - Stores packets in memory until termination
+   - Writes collected packets to disk in PCAP format upon exit
+
+4. **Restoration**:
+   - Sends corrective ARP packets to restore normal network operation
+   - Removes iptables rules
+   - Disables IP forwarding
+
+### Troubleshooting
+
+1. **MAC Address Discovery Failure**
+   - Ensure targets are online and responding to ARP
+   - Check that the specified interface has network access
+   - Try increasing ARP timeout with a code modification
+
+2. **No Traffic Capture**
+   - Verify ARP spoofing success with `arp -a` on targets
+   - Ensure IP forwarding is enabled: `cat /proc/sys/net/ipv4/ip_forward`
+   - Check iptables rules: `sudo iptables -L FORWARD -v`
+
+3. **Permission Errors**
+   - Run with sudo privileges
+   - Check output file path permissions
+
+
+Analysis of captured traffic can be performed with tools like Wireshark, Tshark, or NetworkMiner.
+
+
+****
+# Injection
+
+## False Data Injection Attack
+
+A Python-based FDIA (False Data Injection Attack) tool designed to intercept and modify TCP/ModBus protocol data packets in real-time. Built to demonstrate how attackers can manipulate critical measurement values in industrial systems while remaining undetected.
+
+### Current Implementation
+
+- **Multiple Modification Patterns** with 6 mathematical models:
+  - Static (constant offset)
+  - Dynamic (randomly selected function)
+  - Gaussian distribution
+  - Sigmoid function
+  - Sinusoidal wave
+  - Exponential curve
+  - Pulse/step change
+  - Polynomial (quadratic)
+- **Packet Interception** via NetfilterQueue
+- **Seamless Packet Modification** with automatic checksum recalculation
+- **Automatic IPTables Management** for traffic redirection
+- **Intelligent Error Handling** with cleanup on exceptions
+- **Debug Mode** for real-time attack monitoring
+- **Requires ARP Spoofing** to be running in parallel (uses `arp_spoof.py`)
+
+### Usage
+
+1. **Install dependencies**:`pip3 install scapy netfilterqueue numpy`
+
+2. **Start ARP spoofing in a separate terminal**:`sudo python3 arp_spoof.py 192.168.1.15 192.168.1.23 -i eth0 -r 5`
+
+3. **Execute the FDIA attack**:`sudo python3 FDIA.py 192.168.1.15 -p 30502 -f gaussian`
+
+4. **Monitor with debug mode**:`sudo python3 FDIA.py 192.168.1.15 -p 30502 -f dynamic -d`
+
+5. **Check Kafka for frequency changes**:
+   Monitor the Kafka stream to observe frequency value modifications in real-time.
+
+### Configuration Options
+
+| Option | Description | Default |
+|--------|-------------|---------|
+| `target` | Target IP address (required) | - |
+| `-p/--port` | Target port number | 30502 |
+| `-f/--frequency` | Modification pattern | static |
+| `-d/--debug` | Enable debug output | False |
+
+### Available Frequency Patterns
+
+| Pattern | Description | Effect |
+|---------|-------------|--------|
+| `static` | Constant offset (+30Hz) | Fixed manipulation |
+| `dynamic` | Randomly selected function | Unpredictable changes |
+| `gaussian` | Bell curve distribution | Gradual rise and fall |
+| `sigmoid` | S-shaped curve | Smooth transition |
+| `sin` | Sine wave | Cyclical variation |
+| `exponential` | Exponential decay | Rapid drop-off |
+| `pulse` | Step function | Sudden jump |
+| `polynomial` | Quadratic curve | Parabolic change |
+
+### Troubleshooting
+
+1. **NetfilterQueue Binding Errors**
+   - Verify no other applications are using queue 1
+   - Run: `sudo pkill -f NFQUEUE` to clear existing queue bindings
+   - Install required dependencies:
+     ```
+     sudo apt-get install build-essential python3-dev libnetfilter-queue-dev libnfnetlink-dev
+     sudo apt install libnfnetlink-dev libnetfilter-queue-dev
+     pip3 install nfqp3
+     pip3 install cython
+     git clone https://github.com/oremanj/python-netfilterqueue
+     cd python-netfilterqueue
+     pip3 install .
+     ```
+
+2. **Queue Conflict**
+   - If "Failed to create queue" error appears:
+     ```
+     sudo rm /run/xtables.lock  # Clear stale lock
+     sudo pkill -f NFQUEUE      # Kill existing queue users
+     ```
+
+3. **Missing Traffic**
+   - Confirm ARP spoofing is active and successful
+   - Verify target IP and port are correct
+   - Check iptables rules: `sudo iptables -L FORWARD -v`
+
+4. **No Effect on Target**
+   - Ensure target is using the expected protocol
+   - Check if target validates input values
+   - Try different frequency pattern with larger magnitude
+
+### Operational Notes
+
+1. **Attack flow**:
+   - ARP spoofing redirects traffic through attacker
+   - FDIA intercepts specific packets
+   - Payload values modified according to pattern
+   - Modified packets forwarded to destination
+
+2. This attack specifically targets register 101 with frequency values, but can be modified for other industrial protocols and parameters.
+
+3. Always restore network state after testing by properly terminating both the ARP spoofing and FDIA scripts with Ctrl+C.
+
