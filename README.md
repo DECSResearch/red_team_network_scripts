@@ -408,7 +408,7 @@ A Python-based FDIA (False Data Injection Attack) tool designed to intercept and
 - **Packet Interception** via NetfilterQueue
 - **Seamless Packet Modification** with automatic checksum recalculation
 - **Automatic IPTables Management** for traffic redirection
-- **Intelligent Error Handling** with cleanup on exceptions
+- **Error Handling** with cleanup on exceptions
 - **Debug Mode** for real-time attack monitoring
 - **Requires ARP Spoofing** to be running in parallel (uses `arp_spoof.py`)
 
