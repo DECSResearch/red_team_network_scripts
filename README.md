@@ -20,8 +20,6 @@
 | [ddos_botnet.py](pplx://action/followup) | Multi-threaded flood with IP spoofing |  |  |
 | [dos.py](pplx://action/followup) | ICMP flood with IP spoofing |  |  |
 | [Phishing](pplx://action/followup) | _ |  |  |
-| [arp_storm_targeted.py](pplx://action/followup) | Flood packets of ARP requests to disrupt the device communications |  |  |
-| [arp_storm_network.py](pplx://action/followup) | Flood packets of ARP requests to disrupt the network communications |  |  |
 | [reverse_shell.py](pplx://action/followup) | ADD |  |  |
 | [RCE.py](pplx://action/followup) | Remote Code Execution |  |  |
 
