@@ -436,7 +436,7 @@ A Python-based FDIA (False Data Injection Attack) tool designed to intercept and
 
 | Pattern | Description | Effect |
 |---------|-------------|--------|
-| `static` | Constant offset (+30Hz) | Fixed manipulation |
+| `static` | Constant offset (+60.5Hz) | Fixed manipulation |
 | `dynamic` | Randomly selected function | Unpredictable changes |
 | `gaussian` | Bell curve distribution | Gradual rise and fall |
 | `sigmoid` | S-shaped curve | Smooth transition |
