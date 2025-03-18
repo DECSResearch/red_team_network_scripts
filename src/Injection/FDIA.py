@@ -81,7 +81,7 @@ def get_values():
     global freq_data
     dynamic_list=[gaussian_modifier, sigmoid_modifier, sin_modifier, exponential_modifier, pulse_modifier, polynomial_modifier]
     if freq == 'static':
-        change_values = [0.30]*freq_data
+        change_values = [0.605]*freq_data
         change_values=np.array(change_values)
     elif freq == 'dynamic':
         rand_fun=random.choice(dynamic_list)
