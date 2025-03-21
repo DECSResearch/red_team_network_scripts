@@ -10,6 +10,7 @@
 | [arp_blackout.py](src/impersonation/arp_blackout.py) | Impersonation | Advanced ARP cache poisoning | 2025-03-07| [README](#arp-blackout-attack-tool)|
 | [FDIA.py](src/Injection/FDIA.py) | Injection | TCP/ModBus protocol data manipulation tool | 2025-03-10 | [README](#false-data-injection-attack) |
 | [arp_eavesdrop.py](src/impersonation/arp_eavesdrop.py) | Impersonation | Passive network traffic sniffer | 2025-03-10 | [README](#arp-eavesdropping-attack) |
+| [replay.py](src/Injection/replay.py) | Impersonation | ModBus frequency replay attack | 2025-03-21 | [README](#modbus-replay-attack) |
 
 ## In Progress
 
@@ -490,3 +491,85 @@ A Python-based FDIA (False Data Injection Attack) tool designed to intercept and
 
 3. Always restore network state after testing by properly terminating both the ARP spoofing and FDIA scripts with Ctrl+C.
 
+## ModBus Replay Attack
+
+A network manipulation tool for capturing and replaying industrial control system values through TCP/ModBus protocol. Enables security testing of industrial control systems by demonstrating real-time data injection vulnerabilities.
+
+### Current Impementation
+- **Dual Operation Modes**
+  - **Capture Mode**: Record live frequency values to CSV
+  - **Replay Mode**: Inject stored values into network traffic
+-  Automatic iptables rule management
+-  Packet modification with checksum recalculation
+-  Debug mode for operation verification
+-  Mechanisms for value range constraints (0-65535)
+
+### Usage
+
+1. **Install dependencies**:`pip3 install scapy netfilterqueue numpy`
+
+2. **Start ARP spoofing in a separate terminal**:`sudo python3 arp_spoof.py 192.168.1.15 192.168.1.23 -i eth0 -r 5`
+
+3. **Value Capture/Modification**
+   
+```sudo python3 replay_tool.py 192.168.1.100 -s -o freqlog.csv # Capture```
+
+``` sudo python3 replay_tool.py 192.168.1.100 -a -r freqlog.csv # Replay```
+
+### Operational Modes
+| Mode | Description | Command Example |
+|------|-------------|-----------------|
+| Capture | Record frequency values | `sudo python3 replay_tool.py 192.168.1.100 -s -o freqlog.csv` |
+| Replay | Inject stored values | `sudo python3 replay_tool.py 192.168.1.100 -a -r freqlog.csv` |
+
+### Command Options
+| Option | Description | Default |
+|--------|-------------|---------|
+| `-p/--port` | Target port | 30502 |
+| `-s/--store` | Enable capture mode | False |
+| `-o/--output` | Capture output file | captured_freq.csv |
+| `-a/--attack` | Enable replay mode | False |
+| `-r/--read` | Replay input file | captured_freq.csv |
+| `-d/--debug` | Enable debug mode | False |
+
+### Implementation Details
+- Targets Modbus TCP register 101 (2-byte frequency values)
+- Operates at network layer using NetfilterQueue (queue 1)
+- Packet structure requirements:
+  - Raw payload present
+  - First register == 101
+  - Payload length > 100 bytes
+- Automatic cleanup of network rules on exit
+
+### Troubleshooting
+
+1. **NetfilterQueue Binding Errors**
+   - Verify no other applications are using queue 1
+   - Run: `sudo pkill -f NFQUEUE` to clear existing queue bindings
+   - Install required dependencies:
+     ```
+     sudo apt-get install build-essential python3-dev libnetfilter-queue-dev libnfnetlink-dev
+     sudo apt install libnfnetlink-dev libnetfilter-queue-dev
+     pip3 install nfqp3
+     pip3 install cython
+     git clone https://github.com/oremanj/python-netfilterqueue
+     cd python-netfilterqueue
+     pip3 install .
+     ```
+
+2. **Queue Conflict**
+   - If "Failed to create queue" error appears:
+     ```
+     sudo rm /run/xtables.lock  # Clear stale lock
+     sudo pkill -f NFQUEUE      # Kill existing queue users
+     ```
+
+3. **Missing Traffic**
+   - Confirm ARP spoofing is active and successful
+   - Verify target IP and port are correct
+   - Check iptables rules: `sudo iptables -L FORWARD -v`
+
+4. **No Effect on Target**
+   - Ensure target is using the expected protocol
+   - Check if target validates input values
+   - Try different frequency pattern with larger magnitude
