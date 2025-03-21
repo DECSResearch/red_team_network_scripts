@@ -33,8 +33,8 @@ def capture_traffic(scapy_packet):
             first_register = int.from_bytes(data[0:2], byteorder="big")
             if first_register == 101 and len(payload) > 100:
                 hz_register = int.from_bytes(data[32:34], byteorder="big")
-                
                 change_values.append(hz_register)
+                if debugging: print(f"[*] Frequency captured: {change_values[-1]}")
         scapy_packet.accept()
     except Exception as e:
         print(f"CRITICAL ERROR: {e}")
@@ -104,7 +104,40 @@ def setup_iptables(ip,port):
 def cleanup_iptables(ip, port):
     os.system(f'iptables -D FORWARD -p tcp --sport {port} -s {ip} -j NFQUEUE --queue-num 1')
 
+def check_edge_cases(store, output, attack, read):
+    if not (attack or store):
+        print("[!] Error: Mode must be specified (use -s for store or -a for attack)")
+        return True
 
+    if attack and store:
+        print("[!] Error: Attack mode and store mode cannot be used together")
+        return True
+    if store:
+        if os.path.exists(output):
+            print(f"[!] Warning: Output file '{output}' already exists. It will be overwritten.")
+        try:
+            with open(output, 'w') as f:
+                pass
+            os.remove(output)
+        except PermissionError:
+            print(f"[!] Error: No write permission for output file: {output}")
+            return True
+    if attack:
+        if not os.path.exists(read):
+            print(f"[!] Error: Input file for attack mode does not exist: {read}")
+            return True
+        try:
+            with open(read, 'r') as f:
+                pass
+        except PermissionError:
+            print(f"[!] Error: No read permission for input file: {read}")
+            return True
+    if os.geteuid() != 0:
+        print("[!] Error: This script requires root privileges. Please run with sudo.")
+        return True
+    
+    return False
+        
 
 if __name__ == "__main__":
     
@@ -137,15 +170,7 @@ if __name__ == "__main__":
     attack=args.attack
     read=args.read
     
-    if not (attack or store):
-        print(f'[*] Mode must be specified')
-        sys.exit(1)
-    
-    if attack and store:
-        print("[*] Attack mode and store mode can not be used together")
-        sys.exit(1)
-
-
+    if check_edge_cases(store, output, attack, read): sys.exit(1)
 
     try:
         setup_iptables(ip,port)
@@ -159,7 +184,6 @@ if __name__ == "__main__":
             nfqueue.bind(1, capture_traffic)
             print("[*] Started capture mode")
         print("[*] Starting NFQUEUE")
-        print("[*] Waiting for packets")
         nfqueue.run() 
     except Exception as e:
         print("[*] Error:", e)
