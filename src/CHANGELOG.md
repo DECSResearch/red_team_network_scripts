@@ -1,3 +1,10 @@
+## Version 1.0.3
+Added ICMP flood - Config variables are hardcoded
+Added TCP flood - Config variables are hardcoded
+
+- should account for entropy buffer drain?
+- Patterns? freq of packets?
+
 ## Version 1.0.2
 Added replay attack
 
