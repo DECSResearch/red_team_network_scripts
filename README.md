@@ -11,6 +11,8 @@
 | [FDIA.py](src/Injection/FDIA.py) | Injection | TCP/ModBus protocol data manipulation tool | 2025-03-10 | [README](#false-data-injection-attack) |
 | [arp_eavesdrop.py](src/impersonation/arp_eavesdrop.py) | Impersonation | Passive network traffic sniffer | 2025-03-10 | [README](#arp-eavesdropping-attack) |
 | [replay.py](src/Injection/replay.py) | Impersonation | ModBus frequency replay attack | 2025-03-21 | [README](#modbus-replay-attack) |
+| [dos_icmp.py](src/flooding/dos_icmp.py) | Flooding | ICMP flood with IP spoofing and Rate Limiting| 2025-03-28 | To-Update |
+| [dos_icmp.py](src/flooding/dos_tcp.py) | Flooding | TCP flood with IP spoofing and Rate Limiting | 2025-03-28 | To-Update |
 
 ## In Progress
 
@@ -19,7 +21,6 @@
 | [keylogger.py](add/keylogger.py) | Cross-platform input capture module | _ | _ |
 | [distributed_bruteforce.py](pplx://action/followup) | - |  |  |
 | [ddos_botnet.py](pplx://action/followup) | Multi-threaded flood with IP spoofing |  |  |
-| [dos.py](pplx://action/followup) | ICMP flood with IP spoofing |  |  |
 | [Phishing](pplx://action/followup) | _ |  |  |
 | [reverse_shell.py](pplx://action/followup) | ADD |  |  |
 | [RCE.py](pplx://action/followup) | Remote Code Execution |  |  |
