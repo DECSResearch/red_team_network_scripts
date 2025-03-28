@@ -1,9 +1,12 @@
 ## Version 1.0.3
 Added ICMP flood - Config variables are hardcoded
 Added TCP flood - Config variables are hardcoded
+Added DNS Amplification Attack
 
 - should account for entropy buffer drain?
 - Patterns? freq of packets?
+
+- Should refactor the above codes - handle edge cases, and pass args
 
 ## Version 1.0.2
 Added replay attack
