@@ -12,7 +12,7 @@
 | [arp_eavesdrop.py](src/impersonation/arp_eavesdrop.py) | Impersonation | Passive network traffic sniffer | 2025-03-10 | [README](#arp-eavesdropping-attack) |
 | [replay.py](src/Injection/replay.py) | Impersonation | ModBus frequency replay attack | 2025-03-21 | [README](#modbus-replay-attack) |
 | [dos_icmp.py](src/flooding/dos_icmp.py) | Flooding | ICMP flood with IP spoofing and Rate Limiting| 2025-03-28 | To-Update |
-| [dos_icmp.py](src/flooding/dos_tcp.py) | Flooding | TCP flood with IP spoofing and Rate Limiting | 2025-03-28 | To-Update |
+| [dos_tcp.py](src/flooding/dos_tcp.py) | Flooding | TCP flood with IP spoofing and Rate Limiting | 2025-03-28 | To-Update |
 | [dns_ampification.py](src/flooding/dns_ampification.py) | Flooding | DNS Ampification attack | 2025-03-28 | To-Update |
 
 ## In Progress
