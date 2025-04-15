@@ -5,7 +5,7 @@ import time
 import os
 
 
-TARGET = "100.79.68.94"
+TARGET = "192.168.1.23"
 WORKERS = 8
 PAYLOAD_SIZE = 65495 # Max practical payload (65507-12)
 RATE_LIMIT = 0.0000   
@@ -48,7 +48,7 @@ if __name__ == "__main__":
 Target: {TARGET}
 Workers: {WORKERS}
 Payload Size: {PAYLOAD_SIZE}B
-Theoretical Rate: {round(1/RATE_LIMIT * WORKERS)} pps
+Theoretical Rate:{"Unlimited"if RATE_LIMIT == 0.0000 else RATE_LIMIT} packets/sec
 """)
 
     workers = start_workers()

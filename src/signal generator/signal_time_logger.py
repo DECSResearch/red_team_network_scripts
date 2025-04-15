@@ -4,6 +4,8 @@ import argparse
 import subprocess
 from time import sleep
 
+import signal
+
 from tqdm import tqdm
 
 import logging
@@ -11,8 +13,6 @@ import logging
 TIME_DURATION = timedelta(minutes=30)
 
 logging.basicConfig(
-    filename='history_status.log',
-    filemode='a',
     format='%(asctime)s, %(msecs)d %(name)s - %(levelname)s : %(message)s',
     datefmt='%H:%M:%S',
     level=logging.DEBUG  
@@ -33,17 +33,18 @@ def logger(level_name,message):
         else:
             logging.error(f"Invalid logging level: {level_name}")
             
+            
 def run_command(command):
     try:
-        proc = subprocess.Popen(command, shell=True)
+        proc = subprocess.Popen(command, shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         
         total_seconds = int(TIME_DURATION.total_seconds())
         
         for _ in tqdm(range(total_seconds), desc="Attack duration", unit="s"):
             sleep(1)
             
-        proc.kill()
-        proc.wait()
+        proc.send_signal(signal.SIGINT)
+        sleep(1)
         
     except Exception as e:
         logger('error', f"Error running command: {e}")
@@ -124,7 +125,7 @@ if __name__ == "__main__":
     parser.add_argument('target1', help='IP of first target')
     parser.add_argument('target2', help='IP of second target')
     
-    TIME_DURATION = timedelta(minutes=30)
+    TIME_DURATION = timedelta(minutes=1)
     
     #RUN
     # sudo python3 main.py <target1> <target2>
