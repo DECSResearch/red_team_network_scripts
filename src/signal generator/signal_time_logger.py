@@ -61,7 +61,7 @@ def bruteforce_char(ip_addr):
 
 def dos_imcp(ip_addr):
     
-    command = f'sudo python3 icmp_flood.py'
+    command = f'sudo python3 dos_icmp.py'
     
     run_command(command)
     
@@ -69,7 +69,7 @@ def dos_imcp(ip_addr):
 
 def dos_tcp(ip_addr):
     
-    command = f'sudo python3 tcp_flood.py'
+    command = f'sudo python3 doc_tcp.py'
     
     run_command(command)
     
@@ -103,7 +103,7 @@ def arp_blackout(ip_addr):
 ## Injection ATTACKS
 def tcp_flag_injection(ip_addr):
     
-    command = f'sudo python3 tcp_flag.py {ip_addr} -f 19'
+    command = f'sudo python3 tcp_flag_injection.py {ip_addr} -f 19'
     
     run_command(command)
     
