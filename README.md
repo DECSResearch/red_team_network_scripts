@@ -14,6 +14,7 @@
 | [dos_icmp.py](src/flooding/dos_icmp.py) | Flooding | ICMP flood with IP spoofing and Rate Limiting| 2025-03-28 | To-Update |
 | [dos_tcp.py](src/flooding/dos_tcp.py) | Flooding | TCP flood with IP spoofing and Rate Limiting | 2025-03-28 | To-Update |
 | [dns_ampification.py](src/flooding/dns_ampification.py) | Flooding | DNS Ampification attack | 2025-03-28 | To-Update |
+| [tcp_flag_injection.py](src/Injection/tcp_flag_injection.py) | Injection | TCP flag injection for non‑standard combinations | N/A | To-Update |
 
 ## In Progress
 
@@ -575,3 +576,13 @@ A network manipulation tool for capturing and replaying industrial control syste
    - Ensure target is using the expected protocol
    - Check if target validates input values
    - Try different frequency pattern with larger magnitude
+
+
+
+
+## TCP Flag Injection
+
+TCP flags (e.g., NULL or Xmas scans) are injected into the network to analyze how the target responds, which can reveal operating system details or firewall behavior.
+Malformed packets may be used to confuse stateful packet inspectors or to disrupt established connections (for example, using a combination like FIN+RST to force unusual session termination).
+
+Classification rational: The unusual TCP flag combinations —by their nature of being intentionally malformed or contradictory—are used as a form of packet injection. This injection is aimed at eliciting abnormal behaviors from the target’s network stack or security devices, rather than overwhelming them with traffic (flooding) or pretending to be someone else (impersonation).
