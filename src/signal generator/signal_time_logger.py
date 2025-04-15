@@ -4,14 +4,14 @@ import argparse
 import subprocess
 from time import sleep
 
-import tqdm
+from tqdm import tqdm
 
 import logging
 
 TIME_DURATION = timedelta(minutes=30)
 
 logging.basicConfig(
-    filename='src\history_status.log',
+    filename='history_status.log',
     filemode='a',
     format='%(asctime)s, %(msecs)d %(name)s - %(levelname)s : %(message)s',
     datefmt='%H:%M:%S',
@@ -41,6 +41,7 @@ def run_command(command):
         
         for _ in tqdm(range(total_seconds), desc="Attack duration", unit="s"):
             sleep(1)
+            
         proc.kill()
         proc.wait()
         
@@ -109,11 +110,11 @@ def tcp_flag_injection(ip_addr):
     
     return
 
-def replay_attack():
+def replay_attack(ip_addr1, ip_addr2):
     
     return
 
-def fdia_attack():
+def fdia_attack(ip_addr1, ip_addr2):
     
     return
             
@@ -124,6 +125,9 @@ if __name__ == "__main__":
     parser.add_argument('target2', help='IP of second target')
     
     TIME_DURATION = timedelta(minutes=30)
+    
+    #RUN
+    # sudo python3 main.py <target1> <target2>
     
     args = parser.parse_args()
     
