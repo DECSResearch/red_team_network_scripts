@@ -53,7 +53,7 @@ def run_command(command):
 ## FLOODING ATTACKS            
 def bruteforce_char(ip_addr):
     
-    command= f'sudo python3 bruteforce.py {ip_addr} sample_username'
+    command= f'sudo python3 bruteforce_char.py {ip_addr} sample_username'
     run_command(command)
     
     return
@@ -69,7 +69,7 @@ def dos_imcp(ip_addr):
 
 def dos_tcp(ip_addr):
     
-    command = f'sudo python3 doc_tcp.py'
+    command = f'sudo python3 dos_tcp.py'
     
     run_command(command)
     
