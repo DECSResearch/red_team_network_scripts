@@ -65,9 +65,35 @@ A python based SSH credential brute-forcing using character combinations.
 
 Example: `python3 bruteforce.py 192.168.1.45 admin`
 
-3. **Monitor progress**:
+Below is a clear, Markdown-formatted section for your README file that explains both monitoring the brute force progress and monitoring SSH connection attempts on the victim device.
+
+---
+
+3. **Monitor Progress**
+
+When starting a brute force attack, you will see output similar to the following. This indicates that the attack has been initiated against the target IP (e.g., 192.168.1.45) with the specified username, and shows the progress of the attack:
+
+```plaintext
 [*] Starting brute force attack on 192.168.1.45 with username admin
 Brute Force Progress: 0%|           | 0/100 [00:00<?, ?it/s]
+```
+
+---
+
+4. **Monitor on Victim Device**
+
+To capture only the initial SSH connection requests (i.e., SYN packets) on the victim device, use the following `tcpdump` command:
+
+```bash
+sudo tcpdump -i any -n 'tcp port 22 and tcp[13] == 2'
+```
+
+**Command Breakdown**
+
+- **`-i any`**: Listen on all available interfaces.
+- **`-n`**: Do not resolve hostnames or IP addresses.
+- **`tcp port 22`**: Filter to capture only traffic destined for port 22 (SSH).
+- **`tcp[13] == 2`**: Capture only packets where the 13th byte of the TCP header (the flags) is equal to 2, which corresponds to SYN packets with no ACK flag set. This ensures that you are only monitoring new connection requests and not ongoing SSH communications.
 
 ### Configuration Options
 | Parameter | Default | Description |
