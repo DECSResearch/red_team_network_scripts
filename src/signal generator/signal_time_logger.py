@@ -36,15 +36,20 @@ def logger(level_name,message):
             
 def run_command(command):
     try:
-        proc = subprocess.Popen(command, shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        proc = subprocess.Popen(command, shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, preexec_fn=os.setsid)
+        
         
         total_seconds = int(TIME_DURATION.total_seconds())
         
         for _ in tqdm(range(total_seconds), desc="Attack duration", unit="s"):
             sleep(1)
             
-        proc.send_signal(signal.SIGINT)
-        sleep(1)
+            
+        pgid = os.getpgid(proc.pid)
+
+        os.killpg(pgid, signal.SIGINT)
+        
+        sleep(2)
         
     except Exception as e:
         logger('error', f"Error running command: {e}")
@@ -54,16 +59,20 @@ def run_command(command):
 
 def run_2_command(command1, command2):
     try:
-        proc1 = subprocess.Popen(command1, shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-        proc2 = subprocess.Popen(command2, shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        proc1 = subprocess.Popen(command1, shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, preexec_fn=os.setsid)
+        proc2 = subprocess.Popen(command2, shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, preexec_fn=os.setsid)
         
         total_seconds = int(TIME_DURATION.total_seconds())
         
         for _ in tqdm(range(total_seconds), desc="Attack duration", unit="s"):
             sleep(1)
             
-        proc1.send_signal(signal.SIGINT)
-        proc2.send_signal(signal.SIGINT)
+        pgid1 = os.getpgid(proc1.pid)
+        pgid2 = os.getpgid(proc2.pid)
+
+        os.killpg(pgid1, signal.SIGINT)
+        os.killpg(pgid2, signal.SIGINT)
+        
         sleep(3)
         
     except Exception as e:
