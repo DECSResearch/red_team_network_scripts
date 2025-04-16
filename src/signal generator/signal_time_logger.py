@@ -218,14 +218,6 @@ if __name__ == "__main__":
     logger('info',f"Duration of ARP Eveadropping attack on {IP_ADDR_1} and {IP_ADDR_2}: {tock-tick}")
     sleep(int(random.randint(120, 180)))
     
-    ## ARP Blackout attack
-    tick=datetime.now()
-    logger('info',f"Starting ARP Blackout attack on {IP_ADDR_1} at {tick}")
-    arp_blackout(IP_ADDR_1)
-    tock=datetime.now()
-    logger('info',f"Finished ARP Blackout attack on {IP_ADDR_1} at {tock}")
-    logger('info',f"Duration of ARP Blackout attack on {IP_ADDR_1}: {tock-tick}")
-    sleep(int(random.randint(120, 180)))
     
     # Injection ATTACKS
     ## TCP Flag Injection attack
