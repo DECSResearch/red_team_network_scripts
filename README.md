@@ -210,6 +210,87 @@ text
 | 8         | 65-75         | ~2-3 mins         |  
 *Based on 100Mbps network connection to target*
 
+## ICMP Flood Attack
+
+A high-performance ICMP flooding script designed to overwhelm a target system with large payload pings using raw socket injection. Built using Scapy and multiprocessing, this tool simulates a DoS (Denial of Service) scenario.
+
+### Key Features
+
+- **Raw ICMP packet crafting** with customizable payload size
+- **IP spoofing** via randomized source IPs
+- **Parallel flooding** using multiple processes
+- **Adjustable rate limiting** for pacing packet transmission
+- **Cross-platform compatibility** (Linux preferred for unrestricted payload sizes)
+
+### Usage
+
+```
+sudo python3 dos_icmp.py
+```
+
+> **Note**: Requires root privileges for raw socket access.
+
+
+### Default Configuration
+
+| Parameter | Value | Description |
+|----------|-------|-------------|
+| `TARGET` | <AGX03> | Destination IP |
+| `WORKERS` | 8 | Parallel processes |
+| `PAYLOAD_SIZE` | 65495 bytes | Size of ICMP payload |
+| `RATE_LIMIT` | 0.0000 sec | Delay between packets (0 = max speed) |
+
+To modify behavior, edit the corresponding global variables at the top of the script.
+
+### Packet Structure
+
+Each packet is crafted as:
+
+```
+IP(dst=TARGET, src=RandIP()) /
+ICMP(id=os.getpid(), seq=seq) /
+Raw(load=os.urandom(PAYLOAD_SIZE))
+```
+
+- **Random IP source** to avoid detection / simulate real world attack
+- **Raw payload** for maximizing packet size
+- **Process PID as ID** to track process-level injections
+
+### Theoretical Limits
+
+| Component | Bytes |
+|----------|--------|
+| IPv4 Max Packet Size | 65535 |
+| IP Header | 20 |
+| ICMP Header | 8 |
+| **Max Payload** | **65507** |
+
+*Linux supports up to 65507 bytes, whereas some systems (e.g., Windows) cap this at 65500 bytes.*
+
+
+### Troubleshooting
+
+1. **Permission denied**
+   - Run with `sudo`: raw sockets require elevated privileges
+
+2. **Target not responding**
+   - Check if target is alive (`ping TARGET`)
+   - Ensure firewall isn’t blocking ICMP
+
+3. **Low throughput**
+   - Reduce `PAYLOAD_SIZE` or `WORKERS` to prevent local CPU bottleneck
+   - Confirm NIC or OS is not rate limiting
+
+4. **Script won’t stop**
+   - Use `Ctrl+C` to terminate cleanly
+   - Script automatically kills child processes on interrupt
+
+---
+
+### Operational Notes
+
+- Tool is useful for **load testing**, **resilience simulation**, or demonstrating **rate limiting mechanisms**
+
 ****
 
 # Impersonation
@@ -637,7 +718,6 @@ Classification rational: The unusual TCP flag combinations —by their nature of
 Example:  
 To inject SYN+ACK, use value `18` (2 + 16)
 
----
 
 ### Usage
 
@@ -654,7 +734,6 @@ sudo python3 tcp_flag_injection.py <TARGET_IP> -f <FLAG_VALUE> [-p <PORT>] [-d]
 | `-p` / `--port` | Target port (or -1 for all ports) | `-1` |
 | `-d` / `--debug` | Enable debug output | `False` |
 
----
 
 ### Examples
 
@@ -673,7 +752,6 @@ sudo python3 tcp_flag_injection.py 192.168.1.45 -f 18 -p 22
 sudo python3 tcp_flag_injection.py 192.168.1.45 -f 41 -p 443 -d
 ```
 
----
 
 ### Troubleshooting
 
