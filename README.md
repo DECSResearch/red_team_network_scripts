@@ -608,7 +608,84 @@ A network manipulation tool for capturing and replaying industrial control syste
 
 ## TCP Flag Injection
 
+A network reconnaissance and evasion script that injects **non-standard TCP flag combinations** using Nmap’s raw packet crafting capabilities. This technique is commonly used in OS fingerprinting, IDS/IPS evasion, and low-and-slow scanning.
+
 TCP flags (e.g., NULL or Xmas scans) are injected into the network to analyze how the target responds, which can reveal operating system details or firewall behavior.
 Malformed packets may be used to confuse stateful packet inspectors or to disrupt established connections (for example, using a combination like FIN+RST to force unusual session termination).
 
 Classification rational: The unusual TCP flag combinations —by their nature of being intentionally malformed or contradictory—are used as a form of packet injection. This injection is aimed at eliciting abnormal behaviors from the target’s network stack or security devices, rather than overwhelming them with traffic (flooding) or pretending to be someone else (impersonation).
+
+### Key Features
+
+- Accepts **integer flag values** (bitmask-based, e.g., 18 = SYN+ACK)
+- Converts numeric flag value to **readable flag names**
+- Supports **full-port scans** or single-port scans
+- Generates and executes corresponding **Nmap scan with `--scanflags`**
+- Provides optional **debug output** for visibility
+
+### TCP Flag Codes
+
+| Flag | Value |
+|------|-------|
+| FIN  | 1     |
+| SYN  | 2     |
+| RST  | 4     |
+| PSH  | 8     |
+| ACK  | 16    |
+| URG  | 32    |
+
+Example:  
+To inject SYN+ACK, use value `18` (2 + 16)
+
+---
+
+### Usage
+
+```
+sudo python3 tcp_flag_injection.py <TARGET_IP> -f <FLAG_VALUE> [-p <PORT>] [-d]
+```
+
+#### Parameters
+
+| Parameter | Description | Default |
+|----------|-------------|---------|
+| `<TARGET_IP>` | Target IP address | *Required* |
+| `-f` / `--flag` | TCP flag value (0–63) | *Required* |
+| `-p` / `--port` | Target port (or -1 for all ports) | `-1` |
+| `-d` / `--debug` | Enable debug output | `False` |
+
+---
+
+### Examples
+
+1. **Inject SYN flag (2) across all ports**:
+```
+sudo python3 tcp_flag_injection.py 192.168.1.45 -f 2
+```
+
+2. **Inject SYN+ACK (18) on port 22**:
+```
+sudo python3 tcp_flag_injection.py 192.168.1.45 -f 18 -p 22
+```
+
+3. **Full stealth scan with URG+PSH+FIN (41)**:
+```
+sudo python3 tcp_flag_injection.py 192.168.1.45 -f 41 -p 443 -d
+```
+
+---
+
+### Troubleshooting
+
+1. **"Invalid port value" error?**
+   - Ensure port is between 0 and 65535 or set to `-1`.
+
+2. **"Invalid flag value"?**
+   - Use values between `0` and `63` (bitwise sum of flags above).
+
+3. **No response in output?**
+   - Confirm the target allows custom flag scans
+   - Try adding `-Pn` to the command manually if host discovery fails
+
+4. **Nmap permission issues?**
+   - Always run with `sudo`, as raw socket operations require root
