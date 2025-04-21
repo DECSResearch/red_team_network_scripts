@@ -163,7 +163,7 @@ if __name__ == "__main__":
     parser.add_argument('target1', help='IP of first target')
     parser.add_argument('target2', help='IP of second target')
     
-    TIME_DURATION = timedelta(minutes=5)
+    TIME_DURATION = timedelta(minutes=10)
       
     args = parser.parse_args()
     
