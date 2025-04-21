@@ -291,6 +291,91 @@ Raw(load=os.urandom(PAYLOAD_SIZE))
 
 - Tool is useful for **load testing**, **resilience simulation**, or demonstrating **rate limiting mechanisms**
 
+
+## TCP Flood Attack
+
+A high-volume TCP SYN flood tool built using Scapy and multiprocessing to simulate denial-of-service attacks. The script targets a specified IP with forged SYN packets containing large payloads, stressing the TCP handshake processing capability of the target.
+
+### Key Features
+
+- **TCP SYN packet crafting** with spoofed source IPs and randomized ports
+- **Parallel flooding** using multiple worker processes
+- **Large payload injection** using raw TCP segments
+- **Configurable packet transmission rate**
+- **Stateless attack**—no expectation of reply
+
+
+### Usage
+
+```
+sudo python3 dos_tcp.py
+```
+
+> **Note**: Must be run with `sudo` to allow raw socket access via Scapy.
+
+
+### Default Configuration
+
+| Parameter | Value | Description |
+|----------|-------|-------------|
+| `TARGET` | 192.168.1.23 | Destination IP |
+| `WORKERS` | 8 | Number of parallel processes |
+| `PAYLOAD_SIZE` | 65495 bytes | TCP payload size |
+| `RATE_LIMIT` | 0.0000 sec | Delay between sends (0 = maximum speed) |
+
+To modify behavior, edit the global constants at the top of the script.
+
+
+### Packet Structure
+
+Each packet follows the structure:
+
+```
+IP(dst=TARGET, src=RandIP()) /
+TCP(dport=80, sport=RandPort, flags="S") /
+Raw(load=os.urandom(PAYLOAD_SIZE))
+```
+
+- **SYN flag** used to initiate TCP handshakes
+- **Randomized source ports** to mimic distributed clients
+- **Raw payloads** up to the theoretical TCP max size
+
+### Theoretical Payload Limit
+
+| Layer | Bytes |
+|-------|--------|
+| IPv4 Max Packet Size | 65535 |
+| IP Header | 20 |
+| TCP Header | 20 |
+| **Max Payload** | **65495** |
+
+> Large payloads in SYN packets are often dropped by stricter firewalls. Use smaller payloads if needed.
+
+
+### Troubleshooting
+
+1. **Permission errors**
+   - Ensure script is run with `sudo` to access raw sockets
+
+2. **Low impact on target**
+   - Confirm target has open TCP port 80
+   - Switch port from 80 to another exposed port
+   - Reduce `PAYLOAD_SIZE` if target drops large SYNs
+
+3. **Script does not terminate**
+   - Use `Ctrl+C` to gracefully shut down all child processes
+
+4. **No visible traffic**
+   - Verify raw packets using Wireshark: `tcp.flags.syn == 1 and ip.src != YOUR_IP`
+
+
+### Operational Notes
+
+- Tool is effective against:
+  - Devices lacking SYN flood protection
+  - Load balancers without rate limiting
+  - Simulating botnet-like behavior from a single host
+
 ****
 
 # Impersonation
