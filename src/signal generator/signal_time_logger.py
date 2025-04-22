@@ -10,6 +10,7 @@ import signal
 from tqdm import tqdm
 
 import logging
+import json
 
 TIME_DURATION = timedelta(minutes=30)
 
@@ -170,6 +171,8 @@ if __name__ == "__main__":
     IP_ADDR_1= args.target1
     IP_ADDR_2=args.target2
     
+    result ={}
+    
     # FLOODING
     ## Bruteforce attack
     tick=datetime.now()
@@ -178,6 +181,7 @@ if __name__ == "__main__":
     tock=datetime.now()
     logger('info',f"Finished Bruteforce attack on {IP_ADDR_1} at {tock}")
     logger('info',f"Duration of Bruteforce attack on {IP_ADDR_1}: {tock-tick}")
+    result['Bruteforce'] = {'start': tick, 'end': tock, 'duration': tock-tick}
     sleep(int(random.randint(120, 180)))
     
     ## ICMP Flooding attack
@@ -187,6 +191,7 @@ if __name__ == "__main__":
     tock=datetime.now()
     logger('info',f"Finished ICMP flooding attack on {IP_ADDR_1} at {tock}")
     logger('info',f"Duration of ICMP flooding attack on {IP_ADDR_1}: {tock-tick}")
+    result['ICMP_dos'] = {'start': tick, 'end': tock, 'duration': tock-tick}
     sleep(int(random.randint(120, 180)))
     
     ## TCP Flooding attack
@@ -196,6 +201,7 @@ if __name__ == "__main__":
     tock=datetime.now()
     logger('info',f"Finished TCP flooding attack on {IP_ADDR_1} at {tock}")
     logger('info',f"Duration of TCP flooding attack on {IP_ADDR_1}: {tock-tick}")
+    result['TCP_dos'] = {'start': tick, 'end': tock, 'duration': tock-tick}
     sleep(int(random.randint(120, 180)))
     
     # IMPERSONATION ATTACKS
@@ -207,6 +213,7 @@ if __name__ == "__main__":
     tock=datetime.now()
     logger('info',f"Finished ARP Spoofing attack on {IP_ADDR_1} and {IP_ADDR_2} at {tock}")
     logger('info',f"Duration of ARP Spoofing attack on {IP_ADDR_1} and {IP_ADDR_2}: {tock-tick}")
+    result['ARP_spoof'] = {'start': tick, 'end': tock, 'duration': tock-tick}
     sleep(int(random.randint(120, 180)))
     
     ## ARP Eveadropping attack
@@ -216,6 +223,7 @@ if __name__ == "__main__":
     tock=datetime.now()
     logger('info',f"Finished ARP Eveadropping attack on {IP_ADDR_1} and {IP_ADDR_2} at {tock}")
     logger('info',f"Duration of ARP Eveadropping attack on {IP_ADDR_1} and {IP_ADDR_2}: {tock-tick}")
+    result['ARP_eveadropping'] = {'start': tick, 'end': tock, 'duration': tock-tick}
     sleep(int(random.randint(120, 180)))
     
     
@@ -227,6 +235,7 @@ if __name__ == "__main__":
     tock=datetime.now()
     logger('info',f"Finished TCP Flag Injection attack on {IP_ADDR_1} at {tock}")
     logger('info',f"Duration of TCP Flag Injection attack on {IP_ADDR_1}: {tock-tick}")
+    result['TCP_flag_injection'] = {'start': tick, 'end': tock, 'duration': tock-tick}
     sleep(int(random.randint(120, 180)))
     
     ## Replay attack
@@ -236,6 +245,7 @@ if __name__ == "__main__":
     tock=datetime.now()
     logger('info',f"Finished Replay attack on {IP_ADDR_1} and {IP_ADDR_2} at {tock}")
     logger('info',f"Duration of Replay attack on {IP_ADDR_1} and {IP_ADDR_2}: {tock-tick}")
+    result['Replay'] = {'start': tick, 'end': tock, 'duration': tock-tick}
     sleep(int(random.randint(120, 180)))
     
     ## FDIA attack
@@ -245,6 +255,10 @@ if __name__ == "__main__":
     tock=datetime.now()
     logger('info',f"Finished FDIA attack on {IP_ADDR_1} and {IP_ADDR_2} at {tock}")
     logger('info',f"Duration of FDIA attack on {IP_ADDR_1} and {IP_ADDR_2}: {tock-tick}")
+    result['FDIA'] = {'start': tick, 'end': tock, 'duration': tock-tick}
     
+    with open('attack_results.json', 'w') as f:
+        json.dump(result, f, default=str, indent=2)
+    logger('info',f"Attack results saved to attack_results.json")
     
     logger('info',f"Finished all attacks on {IP_ADDR_1} and {IP_ADDR_2} at {tock}")
