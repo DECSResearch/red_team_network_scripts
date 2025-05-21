@@ -182,7 +182,7 @@ if __name__ == "__main__":
     logger('info',f"Finished Bruteforce attack on {IP_ADDR_1} at {tock}")
     logger('info',f"Duration of Bruteforce attack on {IP_ADDR_1}: {tock-tick}")
     result['Bruteforce'] = {'start': tick, 'end': tock, 'duration': tock-tick}
-    sleep(int(random.randint(120, 180)))
+    sleep(300)
     
     ## ICMP Flooding attack
     tick=datetime.now()
@@ -192,7 +192,7 @@ if __name__ == "__main__":
     logger('info',f"Finished ICMP flooding attack on {IP_ADDR_1} at {tock}")
     logger('info',f"Duration of ICMP flooding attack on {IP_ADDR_1}: {tock-tick}")
     result['ICMP_dos'] = {'start': tick, 'end': tock, 'duration': tock-tick}
-    sleep(int(random.randint(120, 180)))
+    sleep(300)
     
     ## TCP Flooding attack
     tick=datetime.now()
@@ -202,7 +202,7 @@ if __name__ == "__main__":
     logger('info',f"Finished TCP flooding attack on {IP_ADDR_1} at {tock}")
     logger('info',f"Duration of TCP flooding attack on {IP_ADDR_1}: {tock-tick}")
     result['TCP_dos'] = {'start': tick, 'end': tock, 'duration': tock-tick}
-    sleep(int(random.randint(120, 180)))
+    sleep(300)
     
     # IMPERSONATION ATTACKS
     ## ARP Spoofing attack
@@ -214,7 +214,7 @@ if __name__ == "__main__":
     logger('info',f"Finished ARP Spoofing attack on {IP_ADDR_1} and {IP_ADDR_2} at {tock}")
     logger('info',f"Duration of ARP Spoofing attack on {IP_ADDR_1} and {IP_ADDR_2}: {tock-tick}")
     result['ARP_spoof'] = {'start': tick, 'end': tock, 'duration': tock-tick}
-    sleep(int(random.randint(120, 180)))
+    sleep(300)
     
     ## ARP Eveadropping attack
     tick=datetime.now()
@@ -224,7 +224,7 @@ if __name__ == "__main__":
     logger('info',f"Finished ARP Eveadropping attack on {IP_ADDR_1} and {IP_ADDR_2} at {tock}")
     logger('info',f"Duration of ARP Eveadropping attack on {IP_ADDR_1} and {IP_ADDR_2}: {tock-tick}")
     result['ARP_eveadropping'] = {'start': tick, 'end': tock, 'duration': tock-tick}
-    sleep(int(random.randint(120, 180)))
+    sleep(300)
     
     
     # Injection ATTACKS
@@ -236,7 +236,7 @@ if __name__ == "__main__":
     logger('info',f"Finished TCP Flag Injection attack on {IP_ADDR_1} at {tock}")
     logger('info',f"Duration of TCP Flag Injection attack on {IP_ADDR_1}: {tock-tick}")
     result['TCP_flag_injection'] = {'start': tick, 'end': tock, 'duration': tock-tick}
-    sleep(int(random.randint(120, 180)))
+    sleep(300)
     
     ## Replay attack
     tick=datetime.now()
@@ -246,7 +246,7 @@ if __name__ == "__main__":
     logger('info',f"Finished Replay attack on {IP_ADDR_1} and {IP_ADDR_2} at {tock}")
     logger('info',f"Duration of Replay attack on {IP_ADDR_1} and {IP_ADDR_2}: {tock-tick}")
     result['Replay'] = {'start': tick, 'end': tock, 'duration': tock-tick}
-    sleep(int(random.randint(120, 180)))
+    sleep(300)
     
     ## FDIA attack
     tick=datetime.now()
