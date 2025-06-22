@@ -132,7 +132,7 @@ sudo tcpdump -i any -n 'tcp port 22 and tcp[13] == 2'
 - Increase timeout value in `ssh_connect()`
 
 
-## SSH Dictionary Attack Tool
+## SSH ionary Attack Tool
 
 A multi-process Python script for performing high-speed dictionary attacks against SSH services using password lists.
 
@@ -152,7 +152,7 @@ A multi-process Python script for performing high-speed dictionary attacks again
 
 1. **Install dependencies**: `pip3 install paramiko tqdm`
 
-2. **Run attack** (4-core example):`python3 dict_attack.py 192.168.1.25 admin`
+2. **Run attack** (4-core example):`python3  bruteforce_dict.py 192.168.1.25 admin`
 
 3. **Monitor output**:
 [*] Starting Dictionary attack on 192.168.1.25 with username admin
