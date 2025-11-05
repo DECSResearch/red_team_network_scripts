@@ -348,7 +348,7 @@ def parse_args(argv: Optional[Iterable[str]] = None) -> argparse.Namespace:
     parser.add_argument(
         "--seed",
         type=int,
-        default=None,
+        default=42,
         help="Seed to make worker randomness deterministic.",
     )
     parser.add_argument(
