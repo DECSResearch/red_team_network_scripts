@@ -453,3 +453,7 @@ def main(argv: Optional[Iterable[str]] = None) -> int:
 if __name__ == "__main__":
     sys.exit(main())
 
+# Commands to replicate dataset variants
+# sudo python3 src/flooding/dos_temporal_variants.py --target 192.168.1.50 --protocol tcp --variant slow --workers 4 --min-irt 5 --max-irt 15 --payload-size 512
+# sudo python3 src/flooding/dos_temporal_variants.py --target 192.168.1.50 --protocol tcp --variant random --workers 4 --pps 500 --function-codes 1,2,3,4,5,6,15,16,43 --unit-range 0:247 --payload-size 512
+# sudo python3 src/flooding/dos_temporal_variants.py --target 192.168.1.50 --protocol tcp --variant pulse --workers 4 --burst-packets 1000 --burst-window 0.1 --silence 10 --payload-size 512
