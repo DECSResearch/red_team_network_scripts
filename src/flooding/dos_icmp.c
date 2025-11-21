@@ -1,3 +1,5 @@
+// Compile: gcc -O2 -pthread src/flooding/dos_icmp.c -o dos_icmp
+// Run    : sudo ./dos_icmp
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
